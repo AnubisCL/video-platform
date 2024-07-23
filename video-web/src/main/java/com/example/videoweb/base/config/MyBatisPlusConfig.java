@@ -1,6 +1,6 @@
-package com.example.videoweb.config;
+package com.example.videoweb.base.config;
 
-import com.example.videoweb.handler.MysqlMetaObjectHandler;
+import com.example.videoweb.base.handler.MysqlMetaObjectHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
