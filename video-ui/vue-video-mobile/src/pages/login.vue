@@ -1,11 +1,9 @@
-<script setup>
-defineProps({
-  msg: String,
-})
+<script setup lang="ts">
+
 </script>
 
 <template>
-
+login
 </template>
 
 <style scoped>
