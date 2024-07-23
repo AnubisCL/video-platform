@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: video-web
+server:
+  port: 7077
