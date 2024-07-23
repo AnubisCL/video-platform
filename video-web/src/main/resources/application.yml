@@ -1,5 +1,8 @@
+server:
+  port: @server.port@
+
 spring:
   application:
-    name: video-web
-server:
-  port: 7077
+    name: @spring.application.name@
+  profiles:
+    active: @spring.profiles.active@
