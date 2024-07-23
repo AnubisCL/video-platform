@@ -13,19 +13,18 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>video-web</name>
     <description>video-web</description>
-    <url/>
+    <url>https://github.com/AnubisCL/video-plaform</url>
     <licenses>
-        <license/>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <name>AnubisCL</name>
+        </developer>
     </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
     <properties>
         <java.version>17</java.version>
     </properties>
