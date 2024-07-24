@@ -1,22 +1,8 @@
 server:
-  port: @server.port@
+  port: 7077
 
 spring:
   application:
-    name: @spring.application.name@
+    name: video-web
   profiles:
-    active: @spring.profiles.active@
-
-mybatis-plus:
-  global-config:
-    banner: false
-    db-config:
-      # 雪花主键生成策略
-      id-type: ASSIGN_ID
-      # table-prefix: v_
-  # 指定 MyBatis Mapper 对应的 XML 文件位置。
-  mapper-locations: classpath:/mapper/**.xml
-  # 在 Mapper 对应的 XML 文件中可以直接使用类名，无需使用全限定类名。
-  type-aliases-package: com.example.videoweb.domain.entity
-  # 启动时是否检查 MyBatis XML 文件的存在，默认不检查。
-  check-config-location: false
+    active: dev

@@ -4,16 +4,16 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import com.example.videoweb.domain.dto.UserDto;
-import com.example.videoweb.domain.entity.VMenu;
-import com.example.videoweb.domain.entity.VUser;
+import com.example.videoweb.domain.entity.Menu;
+import com.example.videoweb.domain.entity.User;
 import com.example.videoweb.domain.enums.RoleEnum;
 import com.example.videoweb.domain.enums.SignEnum;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.MenuVo;
 import com.example.videoweb.domain.vo.ResultVo;
-import com.example.videoweb.service.VMenuService;
-import com.example.videoweb.service.VRoleService;
-import com.example.videoweb.service.VUserService;
+import com.example.videoweb.service.IMenuService;
+import com.example.videoweb.service.IRoleService;
+import com.example.videoweb.service.IUserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -32,9 +32,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/authentication/")
 public class AuthenticationController {
 
-    @Resource private VUserService userService;
-    @Resource private VRoleService roleService;
-    @Resource private VMenuService menuService;
+    @Resource private IUserService userService;
+    @Resource private IRoleService roleService;
+    @Resource private IMenuService menuService;
 
     /**
      * 注册
@@ -45,12 +45,12 @@ public class AuthenticationController {
     public ResultVo signIn(@RequestBody @Valid UserDto userDto) {
         String signType = userDto.getSignType();
         if (signType.equals(SignEnum.SIGN_IN.getType())) {
-            userService.save(VUser.builder()
+            userService.save(User.builder()
                     .email(userDto.getEmail())
                     .passwordHash(userDto.getPasswordHash())
                     .username(userDto.getEmail())
                     .roleId(RoleEnum.NORMAL_CUSTOMER.getCode()).build());
-            VUser one = userService.lambdaQuery().eq(VUser::getEmail, userDto.getEmail()).one();
+            User one = userService.lambdaQuery().eq(User::getEmail, userDto.getEmail()).one();
             StpUtil.login(one.getUserId());
             return ResultVo.data(StpUtil.getTokenValue());
         }
@@ -66,10 +66,10 @@ public class AuthenticationController {
     public ResultVo doLogin(@RequestBody @Valid UserDto userDto) {
         String signType = userDto.getSignType();
         if (signType.equals(SignEnum.LONG_IN.getType())) {
-            List<VUser> list = userService.lambdaQuery()
-                    .eq(VUser::getUsername, userDto.getUsername())
+            List<User> list = userService.lambdaQuery()
+                    .eq(User::getUsername, userDto.getUsername())
                     .or()
-                    .eq(VUser::getEmail, userDto.getUsername())
+                    .eq(User::getEmail, userDto.getUsername())
                     .list();
             if (!list.isEmpty()) {
                 list.stream().filter(vUser -> vUser.getStatus().equals(StatusEnum.YES.getStatus()))
@@ -104,14 +104,14 @@ public class AuthenticationController {
     @GetMapping("getUserInfo")
     public ResultVo getUserInfo() {
         String userId = StpUtil.getTokenValue();
-        VUser one = userService.lambdaQuery().eq(VUser::getUserId, userId).one();
+        User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
         return ResultVo.data(one);
     }
 
     @GetMapping("getPermissionList")
     public ResultVo getPermissionList() {
         String userId = StpUtil.getTokenValue();
-        VUser one = userService.lambdaQuery().eq(VUser::getUserId, userId).one();
+        User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
         Long roleId = one.getRoleId();
         return ResultVo.data(roleService.getRolePermissionsByRoleId(roleId).keySet());
     }
@@ -119,9 +119,9 @@ public class AuthenticationController {
     @GetMapping("getMenuList")
     public ResultVo getMenuList() {
         String userId = StpUtil.getTokenValue();
-        VUser one = userService.lambdaQuery().eq(VUser::getUserId, userId).one();
+        User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
         Long roleId = one.getRoleId();
-        List<VMenu> menuByRoleId = menuService.getMenuByRoleId(roleId);
+        List<Menu> menuByRoleId = menuService.getMenuByRoleId(roleId);
         List<MenuVo> menuVoList = menuByRoleId.stream()
                 .map(v -> MenuVo.builder()
                         .path(v.getMenuPath())
