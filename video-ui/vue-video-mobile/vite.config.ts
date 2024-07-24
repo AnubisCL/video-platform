@@ -12,16 +12,17 @@ export default defineConfig({
   },
   plugins: [vue()],
   server: {
-    port: 8080, //启动端口
+    port: 7076, //启动端口
     hmr: {
       host: '127.0.0.1',
-      port: 8080
+      port: 7076
     },
     // 设置 https 代理
     proxy: {
       '/api': {
-        target: 'your https address',
+        target: '127.0.0.1:7077',
         changeOrigin: true,
+        logLevel: 'debug',
         rewrite: (path: string) => path.replace(/^\/api/, '')
       }
     }
