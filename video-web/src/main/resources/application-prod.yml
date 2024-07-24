@@ -1,7 +1,7 @@
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://127.0.0.1:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.2.47:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: 1q2w3e4R!@
     hikari:
@@ -9,19 +9,45 @@ spring:
       connection-timeout: 30000
 
 
+############## mybatis-plus 配置 (文档: https://baomidou.com/introduce/) ##############
+mybatis-plus:
+  # 指定 MyBatis Mapper 对应的 XML 文件位置。
+  mapper-locations: classpath*:mapper/xml/*.xml
+  # 在 Mapper 对应的 XML 文件中可以直接使用类名，无需使用全限定类名。
+  type-aliases-package: com.example.videoweb.domain.entity
+  # 启动时是否检查 MyBatis XML 文件的存在，默认不检查。
+  check-config-location: false
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      # 雪花主键生成策略
+      id-type: ASSIGN_ID
+      table-prefix: v_
+
+############## springdoc 配置 (文档: https://openapi.apifox.cn/) ##############
+springdoc:
+  api-docs:
+    enabled: false
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui.html
+
 ############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
 sa-token:
   # token 名称（同时也是 cookie 名称）
-  token-name: satoken
-  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
-  timeout: 86400
+  token-name: web-video-token
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效，1天
+  timeout: 86400 # 1天
   # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
-  active-timeout: -1
+  active-timeout: 18000 # 5小时
   # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
-  is-concurrent: true
+  is-concurrent: false
   # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
   is-share: true
   # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
   token-style: random-32
   # 是否输出操作日志
-  is-log: true
+  is-log: false
