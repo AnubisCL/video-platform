@@ -13,9 +13,11 @@
     "prettier": "prettier --write"
   },
   "dependencies": {
+    "@vant/touch-emulator": "^1.4.0", // 桌面端适配
     "axios": "^1.7.2",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
+    "vant": "^4.9.3",
     "vue": "^3.4.31",
     "vue-router": "^4.4.0"
   },

@@ -5,12 +5,14 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import com.example.videoweb.domain.dto.UserDto;
 import com.example.videoweb.domain.entity.Menu;
+import com.example.videoweb.domain.entity.Role;
 import com.example.videoweb.domain.entity.User;
 import com.example.videoweb.domain.enums.RoleEnum;
 import com.example.videoweb.domain.enums.SignEnum;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.MenuVo;
 import com.example.videoweb.domain.vo.ResultVo;
+import com.example.videoweb.domain.vo.UserVo;
 import com.example.videoweb.service.IMenuService;
 import com.example.videoweb.service.IRoleService;
 import com.example.videoweb.service.IUserService;
@@ -20,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -105,15 +108,29 @@ public class AuthenticationController {
     public ResultVo getUserInfo() {
         String userId = StpUtil.getTokenValue();
         User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
-        return ResultVo.data(one);
+        Long roleId = one.getRoleId();
+        UserVo userVo = UserVo.builder()
+                .userId(one.getUserId())
+                .username(one.getUsername())
+                .email(one.getEmail())
+                .roleId(roleId).build();
+        CompletableFuture.allOf(
+            CompletableFuture.runAsync(() -> {
+                userVo.setRoleName(roleService.lambdaQuery().eq(Role::getRoleId, roleId)
+                        .eq(Role::getStatus, StatusEnum.YES.getStatus()).one().getRoleName());
+            }),
+            CompletableFuture.runAsync(() -> {
+                userVo.setPermissions(roleService.getRolePermissionsByRoleId(roleId).keySet());
+            })
+        );
+        return ResultVo.data(userVo);
     }
 
     @GetMapping("getPermissionList")
     public ResultVo getPermissionList() {
         String userId = StpUtil.getTokenValue();
-        User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
-        Long roleId = one.getRoleId();
-        return ResultVo.data(roleService.getRolePermissionsByRoleId(roleId).keySet());
+        User user = userService.lambdaQuery().eq(User::getUserId, userId).one();
+        return ResultVo.data(roleService.getRolePermissionsByRoleId(user.getRoleId()).keySet());
     }
 
     @GetMapping("getMenuList")
