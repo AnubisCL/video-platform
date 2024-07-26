@@ -22,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -81,10 +82,16 @@ public class AuthenticationController {
                     .eq(User::getEmail, userDto.getEmail())
                     .list();
             if (!list.isEmpty()) {
-                list.stream().filter(vUser -> vUser.getStatus().equals(StatusEnum.YES.getStatus()))
-                    .filter(vUser -> vUser.getPasswordHash().equals(userDto.getPasswordHash()))
-                    .findFirst().ifPresent(vUser -> StpUtil.login(vUser.getUserId()));
-                return ResultVo.data(StpUtil.getTokenValue());
+                Optional<User> optionalUser = list.stream().filter(vUser -> vUser.getStatus().equals(StatusEnum.YES.getStatus()))
+                        .filter(vUser -> vUser.getPasswordHash().equals(userDto.getPasswordHash()))
+                        .findFirst();
+                if (optionalUser.isPresent()) {
+                    User user = optionalUser.get();
+                    StpUtil.login(user.getUserId());
+                    return ResultVo.data(StpUtil.getTokenValue());
+                } else {
+                    return ResultVo.error("用户名或密码错误");
+                }
             }
             return ResultVo.error("用户不存在");
         }
