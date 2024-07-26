@@ -18,6 +18,10 @@ public class MysqlMetaObjectHandler implements MetaObjectHandler {
         if (createDate == null) {
             this.strictInsertFill(metaObject, "createDate", Date.class, new Date());
         }
+        Object updateDate = this.getFieldValByName("updateDate", metaObject);
+        if (updateDate == null) {
+            this.strictUpdateFill(metaObject, "updateDate", Date.class, new Date());
+        }
     }
 
     @Override

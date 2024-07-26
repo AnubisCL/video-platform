@@ -1,7 +1,7 @@
 package com.example.videoweb.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
  * @author anubis
  * @since 2024-07-24
  */
-@Controller
+@RestController
 @RequestMapping("/like")
 public class LikeController {
 

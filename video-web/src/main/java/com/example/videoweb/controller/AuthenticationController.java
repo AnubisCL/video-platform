@@ -48,11 +48,17 @@ public class AuthenticationController {
     public ResultVo signIn(@RequestBody @Valid UserDto userDto) {
         String signType = userDto.getSignType();
         if (signType.equals(SignEnum.SIGN_IN.getType())) {
-            userService.save(User.builder()
-                    .email(userDto.getEmail())
-                    .passwordHash(userDto.getPasswordHash())
-                    .username(userDto.getEmail())
-                    .roleId(RoleEnum.NORMAL_CUSTOMER.getCode()).build());
+            try {
+                userService.save(User.builder()
+                        .email(userDto.getEmail())
+                        .passwordHash(userDto.getPasswordHash())
+                        .username(userDto.getUsername())
+                        .roleId(RoleEnum.NORMAL_CUSTOMER.getCode()).build());
+            } catch (Exception e) {
+                //用户名重复
+                userDto.setSignType(SignEnum.LONG_IN.getType());
+                return doLogin(userDto);
+            }
             User one = userService.lambdaQuery().eq(User::getEmail, userDto.getEmail()).one();
             StpUtil.login(one.getUserId());
             return ResultVo.data(StpUtil.getTokenValue());
@@ -72,7 +78,7 @@ public class AuthenticationController {
             List<User> list = userService.lambdaQuery()
                     .eq(User::getUsername, userDto.getUsername())
                     .or()
-                    .eq(User::getEmail, userDto.getUsername())
+                    .eq(User::getEmail, userDto.getEmail())
                     .list();
             if (!list.isEmpty()) {
                 list.stream().filter(vUser -> vUser.getStatus().equals(StatusEnum.YES.getStatus()))
@@ -106,12 +112,13 @@ public class AuthenticationController {
 
     @GetMapping("getUserInfo")
     public ResultVo getUserInfo() {
-        String userId = StpUtil.getTokenValue();
+        Long userId = StpUtil.getLoginIdAsLong();
         User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
         Long roleId = one.getRoleId();
         UserVo userVo = UserVo.builder()
                 .userId(one.getUserId())
                 .username(one.getUsername())
+                .status(one.getStatus())
                 .email(one.getEmail())
                 .roleId(roleId).build();
         CompletableFuture.allOf(
@@ -122,20 +129,20 @@ public class AuthenticationController {
             CompletableFuture.runAsync(() -> {
                 userVo.setPermissions(roleService.getRolePermissionsByRoleId(roleId).keySet());
             })
-        );
+        ).join();
         return ResultVo.data(userVo);
     }
 
     @GetMapping("getPermissionList")
     public ResultVo getPermissionList() {
-        String userId = StpUtil.getTokenValue();
+        Long userId = StpUtil.getLoginIdAsLong();
         User user = userService.lambdaQuery().eq(User::getUserId, userId).one();
         return ResultVo.data(roleService.getRolePermissionsByRoleId(user.getRoleId()).keySet());
     }
 
     @GetMapping("getMenuList")
     public ResultVo getMenuList() {
-        String userId = StpUtil.getTokenValue();
+        Long userId = StpUtil.getLoginIdAsLong();
         User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
         Long roleId = one.getRoleId();
         List<Menu> menuByRoleId = menuService.getMenuByRoleId(roleId);
