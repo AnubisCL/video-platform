@@ -25,7 +25,7 @@ public class CodeGenerator {
         System.out.println(Paths.get(System.getProperty("user.dir")));
         FastAutoGenerator.create("jdbc:mysql://127.0.0.1:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false",
                         "root",
-                        "1q2w3e4R!@")
+                        "root")
                 .globalConfig(builder -> builder
                         .author("anubis")
                         //.enableSwagger() // 开启 swagger2 模式
@@ -58,7 +58,7 @@ public class CodeGenerator {
                     List<IFill> list = new ArrayList<>();
                     list.add(new Column("create_date", FieldFill.INSERT));
                     list.add(new Column("update_date", FieldFill.INSERT_UPDATE));
-                    builder.addInclude("v_video", "v_task") // 设置需要生成的表名
+                    builder.addInclude("v_video") // 设置需要生成的表名
                             .addTablePrefix("v_") // 设置过滤表前缀
                             .entityBuilder()
                             .enableLombok()

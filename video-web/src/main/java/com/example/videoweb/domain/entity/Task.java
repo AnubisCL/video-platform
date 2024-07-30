@@ -12,7 +12,7 @@ import lombok.Setter;
 
 /**
  * <p>
- * 视频表
+ * 任务表
  * </p>
  *
  * @author anubis
@@ -20,31 +20,28 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("v_video")
-@Schema(name = "Video", description = "视频表")
-public class Video {
+@TableName("v_task")
+@Schema(name = "Task", description = "任务表")
+public class Task {
 
-    @Schema(description = "视频Id")
-    @TableId(value = "video_id", type = IdType.AUTO)
-    private Long videoId;
+    @Schema(description = "任务Id")
+    @TableId(value = "task_id", type = IdType.AUTO)
+    private Long taskId;
 
-    @Schema(description = "标题")
-    private String title;
+    @Schema(description = "任务名称")
+    private String taskName;
 
-    @Schema(description = "副标题")
-    private String subheading;
+    @Schema(description = "任务类型")
+    private String taskType;
 
-    @Schema(description = "描述")
-    private String description;
+    @Schema(description = "0:未开始,1:正在执行,2:执行完成,3:执行失败")
+    private Integer taskStatus;
 
-    @Schema(description = "视频（集）")
-    private Long videoSet;
+    @Schema(description = "url 地址")
+    private String downloadUrl;
 
-    @Schema(description = "视频（集）名称")
-    private String videoSetName;
-
-    @Schema(description = "hls url 地址")
-    private String hlsUrl;
+    @Schema(description = "下载Json信息")
+    private String downloadJson;
 
     @Schema(description = "0:正常,1:失效")
     private Integer status;

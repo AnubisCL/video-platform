@@ -1,6 +1,5 @@
 package com.example.videoweb.mapper;
 
-import com.example.videoweb.domain.entity.Video;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

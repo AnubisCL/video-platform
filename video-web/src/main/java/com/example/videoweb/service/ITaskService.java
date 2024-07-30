@@ -1,15 +1,16 @@
 package com.example.videoweb.service;
 
+import com.example.videoweb.domain.entity.Task;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * <p>
- * 视频表 服务类
+ * 任务表 服务类
  * </p>
  *
  * @author anubis
- * @since 2024-07-24
+ * @since 2024-07-30
  */
-public interface IVideoService extends IService<Video> {
+public interface ITaskService extends IService<Task> {
 
 }
