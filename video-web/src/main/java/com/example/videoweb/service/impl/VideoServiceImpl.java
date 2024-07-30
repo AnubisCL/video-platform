@@ -1,9 +1,9 @@
 package com.example.videoweb.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.videoweb.domain.entity.Video;
 import com.example.videoweb.mapper.VideoMapper;
 import com.example.videoweb.service.IVideoService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,5 +16,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements IVideoService {
+
 
 }

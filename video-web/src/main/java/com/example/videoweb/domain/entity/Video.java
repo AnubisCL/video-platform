@@ -46,6 +46,9 @@ public class Video {
     @Schema(description = "hls url 地址")
     private String hlsUrl;
 
+    @Schema(description = "image url 地址")
+    private String imageUrl;
+
     @Schema(description = "0:正常,1:失效")
     private Integer status;
 

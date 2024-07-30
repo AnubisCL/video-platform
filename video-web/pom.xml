@@ -75,6 +75,7 @@
                     <artifactId>HikariCP</artifactId>
                     <groupId>com.zaxxer</groupId>
                 </exclusion>
+                <!-- 内置mybatis与当前项目Springboot版本不匹配 -->
                 <exclusion>
                     <groupId>org.mybatis</groupId>
                     <artifactId>mybatis-spring</artifactId>
