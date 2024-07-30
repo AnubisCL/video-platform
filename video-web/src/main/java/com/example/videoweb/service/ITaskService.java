@@ -13,4 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ITaskService extends IService<Task> {
 
+    void downloadVideo(Task task);
+
+    void pushHlsVideoStreams(Task task);
 }

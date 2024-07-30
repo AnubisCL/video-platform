@@ -34,7 +34,7 @@ public class Task {
     @Schema(description = "任务类型")
     private String taskType;
 
-    @Schema(description = "0:未开始,1:正在执行,2:执行完成,3:执行失败")
+    @Schema(description = "0:未开始,1:正在执行[下载],2:执行完成[下载],3:执行失败[下载],4:正在执行[推流],5:执行完成[推流],6:执行失败[推流]")
     private Integer taskStatus;
 
     @Schema(description = "url 地址")

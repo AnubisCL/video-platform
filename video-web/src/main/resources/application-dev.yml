@@ -8,6 +8,21 @@ spring:
       maximum-pool-size: 5
       connection-timeout: 30000
 
+############## thread-pool 配置 ##############
+thread-pool:
+  core-pool-size: 3
+  max-pool-size: 15
+  queue-capacity: 120
+  keep-alive-seconds: 60
+  thread-name-prefix: Video-Task
+  rejected-execution-handler: CallerRunsPolicy
+
+############## schedule 配置 ##############
+schedule:
+  cron:
+    downloadVideo: '0 0 * * * ?'
+    pushHlsVideoStreams: '0 0 * * * ?'
+    cleanDownloadVideo: '0 0 * * * ?'
 
 ############## mybatis-plus 配置 (文档: https://baomidou.com/introduce/) ##############
 mybatis-plus:
