@@ -17,7 +17,7 @@ import java.util.Map;
  * data = 携带对象 <br>
  * </p>
  *
- * @Author: chailei
+ * @Author: anubis
  * @Date: 2024/7/23 21:02
  */
 public class ResultVo extends LinkedHashMap<String, Object> implements Serializable {

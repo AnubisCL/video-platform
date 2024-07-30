@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * @Author: chailei
+ * @Author: anubis
  * @Date: 2024/7/23 22:27
  */
 @Configuration

@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @Description: 公共线程池
- * @Author: chailei
+ * @Author: anubis
  * @Date: 2024/7/23 14:51
  */
 @Configuration

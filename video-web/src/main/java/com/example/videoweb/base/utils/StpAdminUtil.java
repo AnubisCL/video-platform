@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Sa-Token 权限认证工具类 admin
  *
- * @Author: chailei
+ * @Author: anubis
  * @Date: 2024/7/23 23:47
  */
 public class StpAdminUtil {

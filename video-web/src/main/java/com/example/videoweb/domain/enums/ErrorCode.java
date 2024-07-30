@@ -1,7 +1,7 @@
 package com.example.videoweb.domain.enums;
 
 /**
- * @Author: chailei
+ * @Author: anubis
  * @Date: 2024/7/23 21:04
  */
 public enum ErrorCode {
