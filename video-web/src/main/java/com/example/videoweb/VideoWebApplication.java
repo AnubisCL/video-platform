@@ -8,6 +8,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetAddress;
+import java.util.Objects;
 
 @EnableScheduling
 @SpringBootApplication
@@ -20,7 +21,7 @@ public class VideoWebApplication {
         // 获取Spring Boot应用的本地IP和端口号
         InetAddress inetAddress = InetAddress.getLocalHost();
         String localIp = inetAddress.getHostAddress();
-        int localPort = Integer.parseInt(env.getProperty("server.port"));
+        int localPort = Integer.parseInt(Objects.requireNonNull(env.getProperty("server.port")));
         // 从配置文件中读取swagger-ui路径
         String swaggerPath = env.getProperty("springdoc.swagger-ui.path");
         // 打印swagger-ui的访问URL
