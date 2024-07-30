@@ -23,7 +23,7 @@ public class CodeGenerator {
     public static void main(String[] args) {
         //"/Users/anubis/IdeaProjects/MyGitHub/video-plaform"
         System.out.println(Paths.get(System.getProperty("user.dir")));
-        FastAutoGenerator.create("jdbc:mysql://192.168.2.47:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false",
+        FastAutoGenerator.create("jdbc:mysql://127.0.0.1:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false",
                         "root",
                         "1q2w3e4R!@")
                 .globalConfig(builder -> builder
@@ -58,7 +58,7 @@ public class CodeGenerator {
                     List<IFill> list = new ArrayList<>();
                     list.add(new Column("create_date", FieldFill.INSERT));
                     list.add(new Column("update_date", FieldFill.INSERT_UPDATE));
-                    builder.addInclude("v_collect", "v_history", "v_like", "v_menu", "v_permission", "v_review_scrolling", "v_role", "v_role_permission", "v_tag", "v_user", "v_video", "v_video_tag") // 设置需要生成的表名
+                    builder.addInclude("v_video", "v_task") // 设置需要生成的表名
                             .addTablePrefix("v_") // 设置过滤表前缀
                             .entityBuilder()
                             .enableLombok()
