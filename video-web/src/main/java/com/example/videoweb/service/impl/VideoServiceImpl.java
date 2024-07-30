@@ -1,5 +1,6 @@
 package com.example.videoweb.service.impl;
 
+import com.example.videoweb.domain.entity.Video;
 import com.example.videoweb.mapper.VideoMapper;
 import com.example.videoweb.service.IVideoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
