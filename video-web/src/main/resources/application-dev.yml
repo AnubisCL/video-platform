@@ -8,6 +8,11 @@ spring:
       maximum-pool-size: 5
       connection-timeout: 30000
 
+directory:
+#  back-video: /home/back/video/ # 视频下载路径
+  back-video: /Users/anubis/Downloads/back/video/ # 视频下载路径
+
+
 ############## thread-pool 配置 ##############
 thread-pool:
   core-pool-size: 3

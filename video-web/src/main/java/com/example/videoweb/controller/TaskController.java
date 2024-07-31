@@ -5,13 +5,11 @@ import com.example.videoweb.domain.entity.Task;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.domain.vo.ResultVo;
+import com.example.videoweb.schedule.TaskSchedule;
 import com.example.videoweb.service.ITaskService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -72,5 +70,14 @@ public class TaskController {
             return ResultVo.error("文件上传失败：" + e.getMessage());
         }
     }
+
+    @Resource private TaskSchedule taskSchedule;
+
+    @GetMapping("/doDownload")
+    public ResultVo insertTaskTxt() {
+        taskSchedule.downloadVideoSchedule();
+        return ResultVo.ok("执行成功");
+    }
+
 
 }

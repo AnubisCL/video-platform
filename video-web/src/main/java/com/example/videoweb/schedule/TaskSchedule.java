@@ -31,7 +31,10 @@ public class TaskSchedule {
         log.info(" --- downloadVideoSchedule start --- ");
         List<Task> taskList = taskService.lambdaQuery()
                 .eq(Task::getStatus, StatusEnum.YES.getStatus())
-                .eq(Task::getTaskStatus, TaskStatusEnum.UN_START).list();
+                .eq(Task::getTaskStatus, TaskStatusEnum.UN_START)
+                .orderByDesc(Task::getUpdateDate)
+                .last("limit 1")
+                .list();
         taskList.forEach(task -> {
             videoExecutor.execute(() -> {
                 taskService.downloadVideo(task);
@@ -45,7 +48,10 @@ public class TaskSchedule {
         log.info(" --- pushHlsVideoStreamsSchedule start --- ");
         List<Task> taskList = taskService.lambdaQuery()
                 .eq(Task::getStatus, StatusEnum.YES.getStatus())
-                .eq(Task::getTaskStatus, TaskStatusEnum.DOWNLOAD_COMPLETE).list();
+                .eq(Task::getTaskStatus, TaskStatusEnum.DOWNLOAD_COMPLETE)
+                .orderByDesc(Task::getUpdateDate)
+                .last("limit 5")
+                .list();
         taskList.forEach(task -> {
             videoExecutor.execute(() -> {
                 taskService.pushHlsVideoStreams(task);
