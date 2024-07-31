@@ -45,8 +45,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Override
     public void downloadVideo(Task task) {
-        task.setTaskStatus(TaskStatusEnum.DOWNLOADING.getCode());
-        baseMapper.updateById(task);
+        Task updateTask = new Task();
+        updateTask.setTaskId(task.getTaskId());
+        updateTask.setTaskStatus(TaskStatusEnum.DOWNLOADING.getCode());
+        baseMapper.updateById(updateTask);
 
         String path = createDateDirectory(BASE_DIR, LocalDate.now());
         String videoOutputPath = path + File.separator + task.getTaskId() + ".mp4";
@@ -85,8 +87,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Override
     public void pushHlsVideoStreams(Task task) {
-        task.setTaskStatus(TaskStatusEnum.MP4_COMPLETE.getCode());
-        baseMapper.updateById(task);
+        Task updateTask = new Task();
+        updateTask.setTaskId(task.getTaskId());
+        updateTask.setTaskStatus(TaskStatusEnum.MP4_COMPLETE.getCode());
+        baseMapper.updateById(updateTask);
 
         Video video = new Video();
         video.setTitle(task.getTaskName());
