@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.videoweb.base.utils.ProcessUtil;
 import com.example.videoweb.domain.entity.Task;
+import com.example.videoweb.domain.entity.Video;
 import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.mapper.TaskMapper;
 import com.example.videoweb.service.ITaskService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,8 +37,11 @@ import java.util.Map;
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements ITaskService {
 
-    @Value("${directory.back-video}")
-    private String BASE_DIR;
+    @Value("${directory.back-video}") private String BASE_DIR;
+    @Value("${nginx-config.m3u8-suffix}") private String m3u8Suffix;
+    @Value("${nginx-config.mp4-suffix}") private String mp4Suffix;
+    @Value("${nginx-config.gif-suffix}") private String gifSuffix;
+    @Resource private VideoServiceImpl videoService;
 
     @Override
     public void downloadVideo(Task task) {
@@ -63,9 +68,15 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         ));
 
         // Generate GIF thumbnail using ffmpeg
+        //boolean gifSuccess = ProcessUtil.executeCommand(
+        //        Arrays.asList("ffmpeg", "-ss", Integer.toString((int) (totalSeconds / 2)),
+        //                "-i", videoOutputPath, "-vframes", "125", "-y", gifOutputPath));
+        //前5秒生成GIF
         boolean gifSuccess = ProcessUtil.executeCommand(
-                Arrays.asList("ffmpeg", "-ss", Integer.toString((int) (totalSeconds / 2)),
-                        "-i", videoOutputPath, "-vframes", "125", "-y", gifOutputPath));
+                Arrays.asList("ffmpeg", "-i", videoOutputPath, "-t", "5", "-pix_fmt", "rgb24", gifOutputPath));
+        if (!gifSuccess) {
+            log.error("Failed to generate GIF thumbnail.");
+        }
         if (!gifSuccess) {
             log.error("Failed to generate GIF thumbnail.");
         }
@@ -74,7 +85,28 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Override
     public void pushHlsVideoStreams(Task task) {
+        Video video = new Video();
+        video.setTitle(task.getTaskName());
+        video.setSubheading("");
+        video.setVideoSet(0L);
+        video.setVideoSetName("第一集");
+        String downloadJson = task.getDownloadJson();
+        JSONObject jsonObject = JSON.parseObject(downloadJson);
+        JSONObject downloadRes = jsonObject.getJSONObject("download_res");
+        String outputGifPath = downloadRes.getString("output_gif_path");
+        String outputVideoPath = downloadRes.getString("output_video_path");
+        String totalSeconds = downloadRes.getString("total_seconds");
+        String frame = downloadRes.getString("frame");
+        video.setDescription("时长: " + formatSecondsToMinutesAndSeconds(Double.parseDouble(totalSeconds)) + "，帧数: " + frame);
+        video.setHlsUrl(outputVideoPath.replace(BASE_DIR, mp4Suffix)); // fixme：推流m3u8
+        video.setImageUrl(outputGifPath.replace(BASE_DIR, gifSuffix));
+        videoService.save(video);
+    }
 
+    public static String formatSecondsToMinutesAndSeconds(double seconds) {
+        int minutes = (int) (seconds / 60);
+        int secs = (int) (seconds % 60);
+        return String.format("%d:%02d", minutes, secs);
     }
 
     private void updateTaskWithResults(Task task, double totalSeconds, String gifOutputPath, String videoOutputPath) {

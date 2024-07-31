@@ -31,6 +31,7 @@ import java.util.*;
 public class TaskController {
 
     @Resource private ITaskService taskService;
+    @Resource private TaskSchedule taskSchedule;
 
     @PostMapping("/insertTaskTxt")
     public ResultVo insertTaskTxt(@RequestParam("file") MultipartFile file) {
@@ -71,13 +72,19 @@ public class TaskController {
         }
     }
 
-    @Resource private TaskSchedule taskSchedule;
-
-    @GetMapping("/doDownload")
-    public ResultVo insertTaskTxt() {
+    @GetMapping("/doDownloadVideo")
+    public ResultVo downloadVideo() {
         taskSchedule.downloadVideoSchedule();
         return ResultVo.ok("执行成功");
     }
+
+    @GetMapping("/doPushHlsVideoStreams")
+    public ResultVo pushHlsVideoStreams() {
+        taskSchedule.pushHlsVideoStreamsSchedule();
+        return ResultVo.ok("执行成功");
+    }
+
+
 
 
 }

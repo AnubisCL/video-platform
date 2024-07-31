@@ -9,8 +9,12 @@ spring:
       connection-timeout: 30000
 
 directory:
-#  back-video: /home/back/video/ # 视频下载路径
   back-video: /Users/anubis/Downloads/back/video/ # 视频下载路径
+
+nginx-config:
+  m3u8-suffix: http://192.168.2.122:8080/hls/
+  mp4-suffix: http://192.168.2.122:8080/back/video/
+  gif-suffix: http://192.168.2.122:8080/back/video/
 
 
 ############## thread-pool 配置 ##############
@@ -43,7 +47,6 @@ mybatis-plus:
     banner: true
     db-config:
       # 雪花主键生成策略
-      id-type: ASSIGN_ID
       table-prefix: v_
 
 ############## springdoc 配置 (文档: https://openapi.apifox.cn/) ##############

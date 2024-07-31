@@ -13,5 +13,6 @@ public class VideoVo {
 
     private Long videoId;
     private String imageUrl;
+    private String videoUrl;
     private String title;
 }

@@ -3,8 +3,10 @@ package com.example.videoweb.base.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -13,6 +15,25 @@ import java.util.List;
  */
 @Slf4j
 public class ProcessUtil {
+
+    public static void main(String[] args) {
+        String path = "/Users/anubis/Downloads/back/video/2024/07/31";
+        String videoOutputPath = path + File.separator + "5" + ".mp4";
+        String gifOutputPath = path + File.separator + "5" + ".gif";
+
+        double totalSeconds = Double.parseDouble(ProcessUtil.executeCommandWithResult(
+                Arrays.asList("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+                        "default=noprint_wrappers=1:nokey=1", videoOutputPath)
+        ));
+
+        boolean gifSuccess = ProcessUtil.executeCommand(
+                Arrays.asList("ffmpeg", "-i", videoOutputPath, "-t", "5", "-pix_fmt", "rgb24", gifOutputPath));
+        if (!gifSuccess) {
+            log.error("Failed to generate GIF thumbnail.");
+        }
+
+        System.out.println(totalSeconds);
+    }
 
     public static boolean executeCommand(List<String> command) {
         ProcessBuilder processBuilder = new ProcessBuilder(command);

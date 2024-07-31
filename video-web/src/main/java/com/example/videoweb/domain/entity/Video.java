@@ -25,7 +25,7 @@ import lombok.Setter;
 public class Video {
 
     @Schema(description = "视频Id")
-    @TableId(value = "video_id", type = IdType.AUTO)
+    @TableId(value = "video_id", type = IdType.ASSIGN_ID)
     private Long videoId;
 
     @Schema(description = "标题")

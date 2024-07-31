@@ -14,6 +14,7 @@ import com.example.videoweb.domain.vo.VideoVo;
 import com.example.videoweb.service.IVideoService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
 @Valid
 @SaCheckLogin
 @RestController
-@RequestMapping("/video")
+@RequestMapping("/video/")
 public class VideoController {
 
     @Resource private IVideoService videoService;
@@ -45,14 +46,18 @@ public class VideoController {
         }
         // todo：VideoDto
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<Video>()
-                .eq(Video::getStatus, StatusEnum.YES.getStatus())
-                .like(Video::getTitle, videoDto.getKeyword()).or()
-                .like(Video::getDescription, videoDto.getKeyword());
+                .eq(Video::getStatus, StatusEnum.YES.getStatus());
+
+        if (!StringUtils.isEmpty(videoDto.getKeyword())) {
+            queryWrapper.like(Video::getTitle, videoDto.getKeyword()).or()
+                    .like(Video::getDescription, videoDto.getKeyword());
+        }
+
         Page<Video> resultPage = videoService.page(page, queryWrapper);
         List<VideoVo> records = resultPage.getRecords()
                 .stream().map(video -> VideoVo.builder()
                         .videoId(video.getVideoId()).imageUrl(video.getImageUrl())
-                        .title(video.getTitle()).build()).toList();
+                        .videoUrl(video.getHlsUrl()).title(video.getTitle()).build()).toList();
         return ResultVo.data(PageVo.builder().pages(resultPage.getPages())
                 .total(resultPage.getTotal()).records(records).build());
     }

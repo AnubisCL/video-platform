@@ -16,7 +16,6 @@ public class VideoDto {
 
     @Valid
     private PageDto page;
-    @NotBlank(message = "搜索词不能为空")
     @Schema(description = "搜索词")
     private String keyword;
 
