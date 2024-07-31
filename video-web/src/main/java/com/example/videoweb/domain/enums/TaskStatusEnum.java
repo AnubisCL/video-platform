@@ -13,7 +13,9 @@ public enum TaskStatusEnum {
     DOWNLOAD_FAIL(3),
     PUSHING(4),
     PUSH_COMPLETE(5),
-    PUSH_FAIL(6);
+    PUSH_FAIL(6),
+    MP4_COMPLETE(7),
+    ;
 
     private Integer code;
 

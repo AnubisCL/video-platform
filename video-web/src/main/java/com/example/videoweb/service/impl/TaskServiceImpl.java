@@ -85,6 +85,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Override
     public void pushHlsVideoStreams(Task task) {
+        task.setTaskStatus(TaskStatusEnum.MP4_COMPLETE.getCode());
+        baseMapper.updateById(task);
+
         Video video = new Video();
         video.setTitle(task.getTaskName());
         video.setSubheading("");
@@ -98,8 +101,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         String totalSeconds = downloadRes.getString("total_seconds");
         String frame = downloadRes.getString("frame");
         video.setDescription("时长: " + formatSecondsToMinutesAndSeconds(Double.parseDouble(totalSeconds)) + "，帧数: " + frame);
-        video.setHlsUrl(outputVideoPath.replace(BASE_DIR, mp4Suffix)); // fixme：推流m3u8
-        video.setImageUrl(outputGifPath.replace(BASE_DIR, gifSuffix));
+        String replaceVideoPath = outputVideoPath.replace(BASE_DIR, mp4Suffix);
+        String replaceGifPath = outputGifPath.replace(BASE_DIR, gifSuffix);
+        video.setHlsUrl(replaceVideoPath); // fixme：推流m3u8
+        video.setImageUrl(replaceGifPath);
         videoService.save(video);
     }
 
