@@ -45,12 +45,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     @Resource private VideoServiceImpl videoService;
 
     @Override
+    @Transactional
     public void downloadVideo(Task task) {
-        Task updateTask = new Task();
-        updateTask.setTaskId(task.getTaskId());
-        updateTask.setTaskStatus(TaskStatusEnum.DOWNLOADING.getCode());
-        baseMapper.updateById(updateTask);
-
         String path = createDateDirectory(BASE_DIR, LocalDate.now());
         String videoOutputPath = path + File.separator + task.getTaskId() + ".mp4";
         String gifOutputPath = path + File.separator + task.getTaskId() + ".gif";

@@ -36,6 +36,10 @@ public class TaskSchedule {
                 .list();
         taskList.forEach(task -> {
             videoExecutor.execute(() -> {
+                Task updateTask = new Task();
+                updateTask.setTaskId(task.getTaskId());
+                updateTask.setTaskStatus(TaskStatusEnum.DOWNLOADING.getCode());
+                taskService.updateById(updateTask);
                 taskService.downloadVideo(task);
             });
         });
