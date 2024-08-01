@@ -1,16 +1,23 @@
 #!/bin/bash
 
+# 基本信息
 JAR_FILE="/home/webui/video-plaform/video-web.jar"
-LOG_FILE="/home/webui/video-plaform/1.log"
 PID_FILE="/home/webui/video-plaform/pid.txt"
-CONFIG_LOCATION="/home/webui/video-plaform/conf" # 替换为你的配置文件路径
+CONFIG_LOCATION="/home/webui/video-plaform/conf/"
+
+# 日志
+LOG_FILE="/home/webui/video-plaform/logs"
+TODAY=$(date +%Y-%m-%d)  # 获取今天的日期
+LOG_FILE_NAME="video-web.log.$TODAY.log"  # 构建日志文件名
+LOG_PATH="/home/webui/video-plaform/logs/$LOG_FILE_NAME"  # 构建完整的日志文件路径
+
 # 远程JVM 远程调试端口
 REMOTE_JVM="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7078"
 
 case "$1" in
     start)
         echo "Starting the application..."
-        nohup java -Xms128m -Xmx128m -Xmn64m -Dspring.config.location=$CONFIG_LOCATION -jar $JAR_FILE > $LOG_FILE 2>&1 &
+        java -Xms128m -Xmx128m -Xmn64m -Dspring.config.location=$CONFIG_LOCATION -jar $JAR_FILE &> /dev/null
         echo $! > $PID_FILE
         ;;
     stop)
@@ -23,8 +30,13 @@ case "$1" in
         fi
         ;;
     log)
-        echo "Showing the log file. Press CTRL+C to exit..."
-        tail -f $LOG_FILE
+        echo "Showing today's log file. Press CTRL+C to exit..."
+        # 检查日志文件是否存在，如果存在则显示，否则提示用户
+        if [ -f "$LOG_PATH" ]; then
+            tail -10f "$LOG_PATH"
+        else
+            echo "Today's log file does not exist yet."
+        fi
         ;;
     restart)
         echo "Restarting the application..."

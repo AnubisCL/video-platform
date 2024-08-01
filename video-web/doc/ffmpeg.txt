@@ -1,0 +1,29 @@
+ffmpeg -i ./test.mp4 -y -f image2 -t 0.001 -s 352x240 ./ffmpeg-img/output.jpg
+
+# 前30帧to gif
+ffmpeg -i ./test.mp4 -vframes 30 -y -f gif ./ffmpeg-img/output.gif
+
+// 修改为 截取从视频中间时间 帧数往后的125帧 
+ffmpeg -i ./test.mp4 -vframes 30 -y -f gif ./ffmpeg-img/output.gif
+ffmpeg -ss 12437 -i ./1.mp4 -vframes 125 -y -f gif ./1.gif
+# 前10s生成gif
+ffmpeg -i 1.mp4 -t 10 -pix_fmt rgb24 out.gif
+
+ffmpeg -i ./test.mp4 -frames 3 -vf "select=not(mod(n\,1000)),scale=320:240,tile=2x3" ./ffmpeg-img/out.png
+
+ffmpeg -i ./test.mp4 -t 10 -pix_fmt rgb24 ./ffmpeg-img/output-2.gif
+
+ffmpeg -i ./test.mp4 -y -f mjpeg -ss 180 -t 0.001 -s 320x240 ./ffmpeg-img/output-3min.jpg
+
+ffmpeg -i out.mp4 -frames 3 -vf "select=not(mod(n\,1000)),scale=320:240,tile=2x3" out.png
+
+ffmpeg -i ./test.mp4 -vf "select='gte(n\,0)+eq(mod(t\,180)\,0)',setpts=N/FRAME_RATE/TB" -loop 0 -y -f gif ./ffmpeg-img/output-60.gif
+
+ffmpeg -i ./test.mp4 -vf "select=not(mod(n\,4500))" -vsync vfr ./ffmpeg-img/frame%04d.png
+
+# 获取视频总秒数
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ./test.mp4
+
+
+
+   
