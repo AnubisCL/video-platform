@@ -25,14 +25,14 @@ public class TaskSchedule {
     @Resource private ITaskService taskService;
 
 
-    //@Scheduled(cron = "${schedule.cron.downloadVideo}")
+    @Scheduled(cron = "${schedule.cron.downloadVideo}")
     public void downloadVideoSchedule() {
         log.info(" --- downloadVideoSchedule start --- ");
         List<Task> taskList = taskService.lambdaQuery()
                 .eq(Task::getStatus, StatusEnum.YES.getStatus())
                 .eq(Task::getTaskStatus, TaskStatusEnum.UN_START.getCode())
                 .orderByDesc(Task::getUpdateDate)
-                .last("limit 2")
+                .last("limit 1")
                 .list();
         taskList.forEach(task -> {
             videoExecutor.execute(() -> {
@@ -46,14 +46,14 @@ public class TaskSchedule {
         log.info(" --- downloadVideoSchedule end --- ");
     }
 
-    //@Scheduled(cron = "${schedule.cron.pushHlsVideoStreams}")
+    @Scheduled(cron = "${schedule.cron.pushHlsVideoStreams}")
     public void pushHlsVideoStreamsSchedule() {
         log.info(" --- pushHlsVideoStreamsSchedule start --- ");
         List<Task> taskList = taskService.lambdaQuery()
                 .eq(Task::getStatus, StatusEnum.YES.getStatus())
                 .eq(Task::getTaskStatus, TaskStatusEnum.DOWNLOAD_COMPLETE.getCode())
                 .orderByDesc(Task::getUpdateDate)
-                .last("limit 5")
+                .last("limit 7")
                 .list();
         taskList.forEach(task -> {
             videoExecutor.execute(() -> {

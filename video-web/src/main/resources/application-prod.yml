@@ -28,8 +28,8 @@ thread-pool:
 ############## schedule 配置 ##############
 schedule:
   cron:
-    downloadVideo: '0 0 * * * ?'
-    pushHlsVideoStreams: '0 0 0 * * ?'
+    downloadVideo: '0 0 0,14,15,16,17,22,23,21 * * ?'
+    pushHlsVideoStreams: '0 0 * * * ?'
     cleanDownloadVideo: '0 0 0 * * ?'
 
 ############## mybatis-plus 配置 (文档: https://baomidou.com/introduce/) ##############
