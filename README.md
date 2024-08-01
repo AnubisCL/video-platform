@@ -1,2 +1,2 @@
-# video-plaform
+# video-platform
 Personal video website
