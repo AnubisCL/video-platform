@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # 基本信息
-JAR_FILE="/home/webui/video-platform/video-web.jar"
 PID_FILE="/home/webui/video-platform/pid.txt"
-CONFIG_LOCATION="/home/webui/video-platform/conf/"
+JAR_FILE=/home/webui/video-platform/video-web.jar
+CONFIG_LOCATION=/home/webui/video-platform/conf/
 
 # 日志
-LOG_FILE="/home/webui/video-platform/logs"
 TODAY=$(date +%Y-%m-%d)  # 获取今天的日期
 LOG_FILE_NAME="video-web.log.$TODAY.log"  # 构建日志文件名
 LOG_PATH="/home/webui/video-platform/logs/$LOG_FILE_NAME"  # 构建完整的日志文件路径
@@ -17,7 +16,7 @@ REMOTE_JVM="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7078"
 case "$1" in
     start)
         echo "Starting the application..."
-        java -Xms128m -Xmx128m -Xmn64m -Dspring.config.location=$CONFIG_LOCATION -jar $JAR_FILE &> /dev/null
+        nohup java -Xms256m -Xmx256m -Xmn128m -jar -Dspring.config.location=$CONFIG_LOCATION $JAR_FILE > /dev/null 2>&1 &
         echo $! > $PID_FILE
         ;;
     stop)
