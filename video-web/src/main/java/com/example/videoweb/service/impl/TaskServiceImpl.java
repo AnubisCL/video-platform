@@ -13,6 +13,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,6 +87,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     }
 
     @Override
+    @Transactional
     public void pushHlsVideoStreams(Task task) {
         Task updateTask = new Task();
         updateTask.setTaskId(task.getTaskId());
