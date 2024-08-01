@@ -21,7 +21,7 @@ import java.util.List;
 public class CodeGenerator {
 
     public static void main(String[] args) {
-        //"/Users/anubis/IdeaProjects/MyGitHub/video-plaform"
+        //"/Users/anubis/IdeaProjects/MyGitHub/video-platform"
         System.out.println(Paths.get(System.getProperty("user.dir")));
         FastAutoGenerator.create("jdbc:mysql://127.0.0.1:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false",
                         "root",

@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # 基本信息
-JAR_FILE="/home/webui/video-plaform/video-web.jar"
-PID_FILE="/home/webui/video-plaform/pid.txt"
-CONFIG_LOCATION="/home/webui/video-plaform/conf/"
+JAR_FILE="/home/webui/video-platform/video-web.jar"
+PID_FILE="/home/webui/video-platform/pid.txt"
+CONFIG_LOCATION="/home/webui/video-platform/conf/"
 
 # 日志
-LOG_FILE="/home/webui/video-plaform/logs"
+LOG_FILE="/home/webui/video-platform/logs"
 TODAY=$(date +%Y-%m-%d)  # 获取今天的日期
 LOG_FILE_NAME="video-web.log.$TODAY.log"  # 构建日志文件名
-LOG_PATH="/home/webui/video-plaform/logs/$LOG_FILE_NAME"  # 构建完整的日志文件路径
+LOG_PATH="/home/webui/video-platform/logs/$LOG_FILE_NAME"  # 构建完整的日志文件路径
 
 # 远程JVM 远程调试端口
 REMOTE_JVM="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7078"

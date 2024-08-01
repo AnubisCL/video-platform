@@ -124,5 +124,5 @@ JAR_NAME="video-web.jar"
 if ! echo "$(jps -l)" | grep -q "$JAR_NAME"; then
     echo "The $JAR_NAME process is not running. Starting it now..."
     # 切换目录再执行shell，避免日志输出到当前目录
-    (cd /home/webui/video-plaform && ./main.sh restart) &> /dev/null &
+    (cd /home/webui/video-platform && ./main.sh restart) &> /dev/null &
 fi

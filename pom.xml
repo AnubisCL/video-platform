@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <description>video-platform</description>
-    <url>https://github.com/AnubisCL/video-plaform</url>
+    <url>https://github.com/AnubisCL/video-platform</url>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>

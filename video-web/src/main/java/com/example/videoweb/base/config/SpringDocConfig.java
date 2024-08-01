@@ -30,7 +30,7 @@ public class SpringDocConfig {
         private ExternalDocumentation externalDocumentation() {
             return new ExternalDocumentation()
                     .description("Github Repositories")
-                    .url("https://github.com/AnubisCL/video-plaform");
+                    .url("https://github.com/AnubisCL/video-platform");
         }
 
         @Bean
