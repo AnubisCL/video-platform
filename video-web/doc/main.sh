@@ -11,7 +11,7 @@ LOG_FILE_NAME="video-web.log.$TODAY.log"  # 构建日志文件名
 LOG_PATH="/home/webui/video-platform/logs/$LOG_FILE_NAME"  # 构建完整的日志文件路径
 
 # 远程JVM 远程调试端口
-REMOTE_JVM="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7078"
+REMOTE_JVM="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:7078"
 
 case "$1" in
     start)

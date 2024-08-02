@@ -12,6 +12,16 @@ directory:
   back-video: /Users/anubis/Downloads/back/video/ # 视频下载路径
 
 nginx-config:
+  protocol-type:
+    local:
+      name: local
+      local-ipv4-url: http://127.0.0.1:8080
+    ipv4:
+      name: ipv4
+      replace-ipv4: http://192.168.2.122:8080
+    ipv6:
+      name: ipv6
+      replace-ipv6: http://[::1]:8080
   m3u8-suffix: http://192.168.2.122:8080/hls/
   mp4-suffix: http://192.168.2.122:8080/back/video/
   gif-suffix: http://192.168.2.122:8080/back/video/
