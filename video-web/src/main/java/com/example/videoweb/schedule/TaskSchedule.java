@@ -4,7 +4,6 @@ import com.example.videoweb.domain.entity.Task;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.service.ITaskService;
-import com.example.videoweb.service.IVideoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
