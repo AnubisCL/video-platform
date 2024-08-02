@@ -25,3 +25,12 @@ termux-chroot
 pkg install termux-services -y
 # 更新
 apt update
+
+# proot-distro
+vim ~/.bashrc
+echo "用户: "$(whoami)
+echo "正在登录ubuntu"
+proot-distro login ubuntu
+
+# ipv6 (su)
+ip -6 addr show
