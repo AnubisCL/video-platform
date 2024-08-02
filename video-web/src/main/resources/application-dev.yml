@@ -10,9 +10,11 @@ spring:
 
 directory:
   back-video: /Users/anubis/Downloads/back/video/ # 视频下载路径
+  hls-video: /Users/anubis/Downloads/video-hls/videos/ # m3u8视频下载路径
 
 ffmpeg:
   log-level: warning
+  hls-time: 60
 
 nginx-config:
   protocol-type:

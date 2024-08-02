@@ -10,9 +10,11 @@ spring:
 
 directory:
   back-video: /home/back/video/ # 视频下载路径
+  hls-video: /home/video-hls/videos/ # m3u8视频下载路径
 
 ffmpeg:
   log-level: warning
+  hls-time: 60
 
 nginx-config:
   protocol-type:
@@ -31,9 +33,9 @@ nginx-config:
 
 ############## thread-pool 配置 ##############
 thread-pool:
-  core-pool-size: 3
-  max-pool-size: 15
-  queue-capacity: 120
+  core-pool-size: 8 # 高通骁龙898采用的是三丛集架构，由一颗超大核（ARM Cortex X2）、三颗大核和四颗小核组成
+  max-pool-size: 8
+  queue-capacity: 60
   keep-alive-seconds: 60
   thread-name-prefix: Video-Task
   rejected-execution-handler: CallerRunsPolicy

@@ -93,10 +93,12 @@ public class VideoController {
         boolean isIpv4 = false;
         boolean isIpv6 = false;
         String host = request.getHeader("host");
+        //ipv6
+        String replace = host.replace("[", "").replace("]", "");
         // 判断host是ipv4还是ipv6还是127.0.0.1/localhost
         // 使用 InetAddress 来判断 IP 地址类型
         try {
-            InetAddress inetAddress = InetAddress.getByName(host.split(":")[0]); // 去掉可能存在的端口号
+            InetAddress inetAddress = InetAddress.getByName(replace); // 去掉可能存在的端口号
             if (inetAddress.isLoopbackAddress()) {
                 isLocal = true;
             } else if (inetAddress instanceof java.net.Inet4Address) {
@@ -106,12 +108,12 @@ public class VideoController {
             }
         } catch (UnknownHostException e) {
             // 如果 host 不是一个 IP 地址，尝试使用正则表达式判断
-            if ("localhost".equalsIgnoreCase(host)) {
+            if ("localhost".equalsIgnoreCase(replace)) {
                 log.info("Host is localhost.");
                 isLocal = true;
-            } else if (host.matches("^([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})$")) {
+            } else if (replace.matches("^([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})$")) {
                 isIpv4 = true;
-            } else if (host.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
+            } else if (replace.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
                 isIpv6 = true;
             } else {
                 log.warn("Host is not recognized as an IP address or localhost.");

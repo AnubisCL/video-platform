@@ -23,6 +23,8 @@ public class ThreadPoolTaskExecutorConfig {
     public ThreadPoolTaskExecutor videoExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // 设置核心线程数
+        //CPU 密集型任务：CPU 核心数加 1
+        //IO 密集型任务：CPU 核心数的 2 倍或多一点
         executor.setCorePoolSize(config.getCorePoolSize());
         // 设置最大线程数
         executor.setMaxPoolSize(config.getMaxPoolSize());

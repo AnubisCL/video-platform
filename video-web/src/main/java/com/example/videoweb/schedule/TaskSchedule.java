@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Author: anubis
@@ -45,21 +46,31 @@ public class TaskSchedule {
         log.info(" --- downloadVideoSchedule end --- ");
     }
 
+    private final ReentrantLock lock = new ReentrantLock();
+
     @Scheduled(cron = "${schedule.cron.pushHlsVideoStreams}")
     public void pushHlsVideoStreamsSchedule() {
-        log.info(" --- pushHlsVideoStreamsSchedule start --- ");
-        List<Task> taskList = taskService.lambdaQuery()
-                .eq(Task::getStatus, StatusEnum.YES.getStatus())
-                .eq(Task::getTaskStatus, TaskStatusEnum.DOWNLOAD_COMPLETE.getCode())
-                .orderByDesc(Task::getUpdateDate)
-                .last("limit 7")
-                .list();
-        taskList.forEach(task -> {
-            videoExecutor.execute(() -> {
+        lock.lock();
+        try {
+            log.info(" --- pushHlsVideoStreamsSchedule start --- ");
+            List<Task> taskList = taskService.lambdaQuery()
+                    .eq(Task::getStatus, StatusEnum.YES.getStatus())
+                    .eq(Task::getTaskStatus, TaskStatusEnum.DOWNLOAD_COMPLETE.getCode())
+                    .orderByDesc(Task::getUpdateDate)
+                    .list();
+
+            for (Task task : taskList) {
+                Task updateTask = new Task();
+                updateTask.setTaskId(task.getTaskId());
+                updateTask.setTaskStatus(TaskStatusEnum.PUSHING.getCode());
+                taskService.updateById(updateTask);
+
                 taskService.pushHlsVideoStreams(task);
-            });
-        });
-        log.info(" --- pushHlsVideoStreamsSchedule end --- ");
+            }
+            log.info(" --- pushHlsVideoStreamsSchedule end --- ");
+        } finally {
+            lock.unlock();
+        }
     }
 
     //@Scheduled(cron = "${schedule.cron.cleanDownloadVideo}")

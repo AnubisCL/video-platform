@@ -39,18 +39,23 @@ import java.util.Map;
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements ITaskService {
 
+    private static final String INDEX_M3U8 = "index.m3u8";
     @Value("${directory.back-video}") private String BASE_DIR;
+    @Value("${directory.hls-video}") private String HLS_DIR;
     @Value("${nginx-config.m3u8-suffix}") private String m3u8Suffix;
     @Value("${nginx-config.mp4-suffix}") private String mp4Suffix;
     @Value("${nginx-config.gif-suffix}") private String gifSuffix;
     @Value("${ffmpeg.log-level}") private String ffmpegLogLevel;
+    @Value("${ffmpeg.hls-time}") private String ffmpegHlsTime;
     @Resource private IVideoService videoService;
     @Resource private TaskMapper taskMapper;
 
     @Override
     @Transactional
     public void downloadVideo(Task task) {
-        String path = createDateDirectory(BASE_DIR, LocalDate.now());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String dateStr = LocalDate.now().format(formatter);
+        String path = createDateDirectory(BASE_DIR, dateStr);
         String videoOutputPath = path + File.separator + task.getTaskId() + ".mp4";
         String gifOutputPath = path + File.separator + task.getTaskId() + ".gif";
 
@@ -92,7 +97,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Override
     @Transactional
-    public void pushHlsVideoStreams(Task task) {
+    public void pushMp4VideoStreams(Task task) {
         Task updateTask = new Task();
         updateTask.setTaskId(task.getTaskId());
         updateTask.setTaskStatus(TaskStatusEnum.MP4_COMPLETE.getCode());
@@ -118,6 +123,52 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         videoService.save(video);
     }
 
+
+    @Override
+    @Transactional
+    public void pushHlsVideoStreams(Task task) {
+        Video video = new Video();
+        video.setTitle(task.getTaskName());
+        video.setSubheading("");
+        video.setVideoSet(0L);
+        video.setVideoSetName("第一集");
+        String downloadJson = task.getDownloadJson();
+        JSONObject jsonObject = JSON.parseObject(downloadJson);
+        JSONObject downloadRes = jsonObject.getJSONObject("download_res");
+        String outputGifPath = downloadRes.getString("output_gif_path");
+        String outputVideoPath = downloadRes.getString("output_video_path");
+        String totalSeconds = downloadRes.getString("total_seconds");
+        String frame = downloadRes.getString("frame");
+        video.setDescription("时长: " + formatSecondsToMinutesAndSeconds(Double.parseDouble(totalSeconds)) + "，帧数: " + frame);
+        String replaceGifPath = outputGifPath.replace(BASE_DIR, gifSuffix);
+        video.setImageUrl(replaceGifPath);
+        video.setHlsUrl("");
+        videoService.save(video);
+
+        String loadDirectory = createDateDirectory(HLS_DIR, String.valueOf(video.getVideoId()));
+        String replaceVideoPath = m3u8Suffix + video.getVideoId() + File.separator + INDEX_M3U8;
+        Video videoUpdate = new Video();
+        videoUpdate.setVideoId(video.getVideoId());
+        videoUpdate.setHlsUrl(replaceVideoPath);
+        videoService.updateById(videoUpdate);
+
+        //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 output.m3u8
+        //ffmpeg -i input.mp4 -hls_time 10 -hls_list_size 0 -hls_segment_filename output_%03d.ts output.m3u8
+        boolean executeCommand = ProcessUtil.executeCommand(
+                Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
+                        "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", loadDirectory + File.separator +  INDEX_M3U8)
+        ); //"-hls_wrap", "0",
+
+        Task updateTask = new Task();
+        updateTask.setTaskId(task.getTaskId());
+        if (executeCommand) {
+            updateTask.setTaskStatus(TaskStatusEnum.PUSH_COMPLETE.getCode());
+        } else {
+            updateTask.setTaskStatus(TaskStatusEnum.PUSH_FAIL.getCode());
+        }
+        taskMapper.updateById(updateTask);
+    }
+
     public static String formatSecondsToMinutesAndSeconds(double seconds) {
         int minutes = (int) (seconds / 60);
         int secs = (int) (seconds % 60);
@@ -138,10 +189,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         taskMapper.updateById(task);
     }
 
-    public static String createDateDirectory(String baseDir, LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        String dateStr = date.format(formatter);
-        String fullDirPath = baseDir + dateStr;
+    public static String createDateDirectory(String baseDir, String dirStr) {
+        String fullDirPath = baseDir + dirStr;
         Path path = Paths.get(fullDirPath);
         try {
             if (!Files.exists(path.getParent())) {

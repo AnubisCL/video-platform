@@ -34,6 +34,27 @@ public class ProcessUtil {
         }
 
         System.out.println(totalSeconds);
+
+        /*String HLS_DIR = "/Users/anubis/Downloads/video-hls/videos/"; //'/home/video-hls/videos/'
+        String BASE_DIR = "/Users/anubis/Downloads/back/video/"; //‘/home/back/video/’
+        String outputVideoPath = "/Users/anubis/Downloads/back/video/2024/07/31/1.mp4";
+
+        Long videoId = 1818536429471428610L;
+        String m3u8Suffix = "http://127.0.0.1:8080/hls/";
+
+        String loadDirectory = createDateDirectory(HLS_DIR, String.valueOf(videoId));
+        String replaceVideoPath = m3u8Suffix + videoId + File.separator + INDEX_M3U8;
+        System.out.println("m3u8 地址:" + replaceVideoPath);
+        boolean executeCommand = ProcessUtil.executeCommand(
+                Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
+                        "-2", "-f", "hls", "-hls_time", "60", "-hls_list_size", "0", loadDirectory + File.separator +  INDEX_M3U8)
+        ); //"-hls_wrap", "0",
+
+        if (executeCommand) {
+            System.out.println("ok");
+        } else {
+            System.out.println("error");
+        }*/
     }
 
     public static boolean executeCommand(List<String> command) {
