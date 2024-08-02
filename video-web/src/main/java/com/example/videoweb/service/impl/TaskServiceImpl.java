@@ -54,7 +54,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
         // Download video using ffmpeg
         boolean downloadSuccess = ProcessUtil.executeCommand(
-                Arrays.asList("ffmpeg", "-loglevel", ffmpegLogLevel, "-i", task.getDownloadUrl(), "-c", "copy", videoOutputPath)
+                Arrays.asList("ffmpeg", "-i", task.getDownloadUrl(), "-c", "copy", videoOutputPath)
         );
         if (!downloadSuccess) {
             log.error("Failed to download the video.");

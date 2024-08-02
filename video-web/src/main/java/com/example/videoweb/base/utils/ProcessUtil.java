@@ -56,7 +56,11 @@ public class ProcessUtil {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        log.error("ffmpeg error: {}", line);
+                        if (line.indexOf("Error") > 0) {
+                            log.error("ffmpeg error: {}", line);
+                        } else {
+                            log.info("ffmpeg output: {}", line);
+                        }
                     }
                 } catch (IOException e) {
                     log.error("Error reading ffmpeg error output: {}", e.getMessage());
