@@ -11,6 +11,9 @@ spring:
 directory:
   back-video: /Users/anubis/Downloads/back/video/ # 视频下载路径
 
+ffmpeg:
+  log-level: warning
+
 nginx-config:
   protocol-type:
     local:

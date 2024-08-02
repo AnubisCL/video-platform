@@ -42,6 +42,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     @Value("${nginx-config.m3u8-suffix}") private String m3u8Suffix;
     @Value("${nginx-config.mp4-suffix}") private String mp4Suffix;
     @Value("${nginx-config.gif-suffix}") private String gifSuffix;
+    @Value("${ffmpeg.log-level}") private String ffmpegLogLevel;
     @Resource private VideoServiceImpl videoService;
 
     @Override
@@ -53,7 +54,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
         // Download video using ffmpeg
         boolean downloadSuccess = ProcessUtil.executeCommand(
-                Arrays.asList("ffmpeg", "-i", task.getDownloadUrl(), "-c", "copy", videoOutputPath)
+                Arrays.asList("ffmpeg", "-loglevel", ffmpegLogLevel, "-i", task.getDownloadUrl(), "-c", "copy", videoOutputPath)
         );
         if (!downloadSuccess) {
             log.error("Failed to download the video.");
@@ -72,7 +73,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         //                "-i", videoOutputPath, "-vframes", "125", "-y", gifOutputPath));
         //前5秒生成GIF
         boolean gifSuccess = ProcessUtil.executeCommand(
-                Arrays.asList("ffmpeg", "-i", videoOutputPath, "-t", "5", "-pix_fmt", "rgb24", gifOutputPath));
+                Arrays.asList("ffmpeg", "-loglevel", ffmpegLogLevel, "-i", videoOutputPath, "-t", "5", "-pix_fmt", "rgb24", gifOutputPath));
         if (!gifSuccess) {
             log.error("Failed to generate GIF thumbnail.");
         }

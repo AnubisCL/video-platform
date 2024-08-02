@@ -26,8 +26,9 @@ public class ProcessUtil {
                         "default=noprint_wrappers=1:nokey=1", videoOutputPath)
         ));
 
+        //   ffmpeg -loglevel warning -i input.mp4 output.mp4
         boolean gifSuccess = ProcessUtil.executeCommand(
-                Arrays.asList("ffmpeg", "-i", videoOutputPath, "-t", "5", "-pix_fmt", "rgb24", gifOutputPath));
+                Arrays.asList("ffmpeg", "-loglevel", "warning", "-i", videoOutputPath, "-t", "5", "-pix_fmt", "rgb24", gifOutputPath));
         if (!gifSuccess) {
             log.error("Failed to generate GIF thumbnail.");
         }

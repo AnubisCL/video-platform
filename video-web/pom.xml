@@ -109,6 +109,19 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+            String[] paramNames = ((MethodSignature) proceedingJoinPoint.getSignature()).getParameterNames();
+            获取不到参数，需要添加此配置：开启参数名保存 在 Java 编译时，可以通过 -parameters 选项来保存方法参数名。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

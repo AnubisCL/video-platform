@@ -11,6 +11,9 @@ spring:
 directory:
   back-video: /home/back/video/ # 视频下载路径
 
+ffmpeg:
+  log-level: warning
+
 nginx-config:
   protocol-type:
     local:
