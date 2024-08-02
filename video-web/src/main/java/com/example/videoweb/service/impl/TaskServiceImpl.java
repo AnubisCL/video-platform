@@ -9,6 +9,7 @@ import com.example.videoweb.domain.entity.Video;
 import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.mapper.TaskMapper;
 import com.example.videoweb.service.ITaskService;
+import com.example.videoweb.service.IVideoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     @Value("${nginx-config.mp4-suffix}") private String mp4Suffix;
     @Value("${nginx-config.gif-suffix}") private String gifSuffix;
     @Value("${ffmpeg.log-level}") private String ffmpegLogLevel;
-    @Resource private VideoServiceImpl videoService;
+    @Resource private IVideoService videoService;
+    @Resource private TaskMapper taskMapper;
 
     @Override
     @Transactional
@@ -58,14 +60,20 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         );
         if (!downloadSuccess) {
             log.error("Failed to download the video.");
-            task.setTaskStatus(TaskStatusEnum.DOWNLOAD_FAIL.getCode());
+            Task errorTask = new Task();
+            errorTask.setTaskId(task.getTaskId());
+            errorTask.setTaskStatus(TaskStatusEnum.DOWNLOAD_FAIL.getCode());
+            taskMapper.updateById(errorTask);
+            return;
         }
+        log.info("download the video success.");
 
         // Get video duration using ffprobe
         double totalSeconds = Double.parseDouble(ProcessUtil.executeCommandWithResult(
                 Arrays.asList("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
                         "default=noprint_wrappers=1:nokey=1", videoOutputPath)
         ));
+        log.info("get video totalSeconds success : {}", totalSeconds);
 
         // Generate GIF thumbnail using ffmpeg
         //boolean gifSuccess = ProcessUtil.executeCommand(
@@ -77,9 +85,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         if (!gifSuccess) {
             log.error("Failed to generate GIF thumbnail.");
         }
-        if (!gifSuccess) {
-            log.error("Failed to generate GIF thumbnail.");
-        }
+        log.info("Generate GIF success .");
+
         updateTaskWithResults(task, totalSeconds, gifOutputPath, videoOutputPath);
     }
 
@@ -89,7 +96,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         Task updateTask = new Task();
         updateTask.setTaskId(task.getTaskId());
         updateTask.setTaskStatus(TaskStatusEnum.MP4_COMPLETE.getCode());
-        baseMapper.updateById(updateTask);
+        taskMapper.updateById(updateTask);
 
         Video video = new Video();
         video.setTitle(task.getTaskName());
@@ -128,7 +135,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         json.put("download_res", jsonMap);
         task.setDownloadJson(json.toJSONString());
         task.setTaskStatus(TaskStatusEnum.DOWNLOAD_COMPLETE.getCode());
-        baseMapper.updateById(task);
+        taskMapper.updateById(task);
     }
 
     public static String createDateDirectory(String baseDir, LocalDate date) {
