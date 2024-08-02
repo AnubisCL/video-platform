@@ -27,32 +27,24 @@ public class ControllerLogAspect {
     public void requestServer() {
     }
 
-    @Before("requestServer()")
-    public void doBefore(JoinPoint joinPoint) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes)
-                RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes.getRequest();
-
-        log.info("===============================Start========================");
-        log.info("IP                 : {}", request.getRemoteAddr());
-        log.info("URL                : {}", request.getRequestURL().toString());
-        log.info("HTTP Method        : {}", request.getMethod());
-        log.info("Class Method       : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
-    }
-
     @Around("requestServer()")
     public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         long start = System.currentTimeMillis();
+        ServletRequestAttributes attributes = (ServletRequestAttributes)
+                RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        log.info("=======================Request Start========================");
+        log.info("Remote IP      : {}", request.getRemoteAddr());
+        log.info("URL            : {}", request.getRequestURL().toString());
+        log.info("HTTP Method    : {}", request.getMethod());
+        log.info("Request Params : {}", getRequestParams(proceedingJoinPoint));
+        log.info("=======================Request End==========================");
         Object result = proceedingJoinPoint.proceed();
-        log.info("Request Params       : {}", getRequestParams(proceedingJoinPoint));
-        log.info("Result               : {}", result);
-        log.info("Time Cost            : {} ms", System.currentTimeMillis() - start);
+        log.info("=======================Response Start=======================");
+        log.info("Result         : {}", result);
+        log.info("Time Cost      : {} ms", System.currentTimeMillis() - start);
+        log.info("=======================Response End=========================");
         return result;
-    }
-
-    @After("requestServer()")
-    public void doAfter(JoinPoint joinPoint) {
-        log.info("===============================End========================");
     }
 
     private Map<String, Object> getRequestParams(ProceedingJoinPoint proceedingJoinPoint) {
