@@ -12,6 +12,7 @@ import com.example.videoweb.service.ITaskService;
 import com.example.videoweb.service.IVideoService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -133,7 +134,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void pushHlsVideoStreams(Task task) {
+    public Boolean pushHlsVideoStreams(Task task) {
+        boolean result = true;
         Video video = new Video();
         video.setTitle(task.getTaskName());
         video.setSubheading("");
@@ -151,6 +153,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         video.setImageUrl(replaceGifPath);
         video.setHlsUrl("");
         String loadDirectory = null;
+
+        Task updateTask = new Task();
+        updateTask.setTaskId(task.getTaskId());
+
         try {
             videoService.save(video);
 
@@ -168,24 +174,32 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
                             "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", loadDirectory + File.separator + INDEX_M3U8)
             ); //"-hls_wrap", "0",
 
-            Task updateTask = new Task();
-            updateTask.setTaskId(task.getTaskId());
             if (executeCommand) {
                 updateTask.setTaskStatus(TaskStatusEnum.PUSH_COMPLETE.getCode());
             } else {
                 updateTask.setTaskStatus(TaskStatusEnum.PUSH_FAIL.getCode());
+                throw new RuntimeException("Failed to push video stream.");
             }
-            taskMapper.updateById(updateTask);
         } catch (Exception e) {
+            result = false;
             log.error("pushHlsVideoStreams error : {}", e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("clean loadDirectory : {}", loadDirectory);
             cleanLoadDirectory(loadDirectory);
+        } finally {
+            taskMapper.updateById(updateTask);
         }
+        log.info("pushHlsVideoStreams finished result : [taskId:{},result:{}]", task.getTaskId(), result);
+        return result;
     }
 
-    private void cleanLoadDirectory(String loadDirectory) {
+    private static void cleanLoadDirectory(String loadDirectory) {
         //删除一个目录
+        try {
+            FileUtils.deleteDirectory(new File(loadDirectory));
+        } catch (IOException e) {
+            log.error("Error cleanLoadDirectory : " + e.getMessage());
+        }
     }
 
     public static String formatSecondsToMinutesAndSeconds(double seconds) {

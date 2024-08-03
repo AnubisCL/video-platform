@@ -16,5 +16,5 @@ public interface ITaskService extends IService<Task> {
     void downloadVideo(Task task);
 
     void pushMp4VideoStreams(Task task);
-    void pushHlsVideoStreams(Task task);
+    Boolean pushHlsVideoStreams(Task task);
 }

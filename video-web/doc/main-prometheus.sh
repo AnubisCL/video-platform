@@ -8,7 +8,6 @@ LOG_FILE="$BASE_DIR/prometheus.log"
 
 # 启动 Prometheus
 start_prometheus() {
-#  ./prometheus --config.file=/home/prometheus/prometheus-2.54.0-rc.0.linux-arm64/prometheus.yml
     nohup $PROMETHEUS_PATH --config.file=$CONFIG_FILE > $LOG_FILE 2>&1 &
     echo "Prometheus started."
 }
