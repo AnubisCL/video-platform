@@ -34,3 +34,16 @@ proot-distro login ubuntu
 
 # ipv6 (su)
 ip -6 addr show
+
+# [Process completed (signal 9) - press Enter]
+# 原因：Android 12及以上的PhantomProcesskiller限制了应用的子进程，最大允许应用有32个子进程。
+# https://blog.csdn.net/a18845594188/article/details/131296936
+pkg install android-tools
+adb pair 192.168.1.6:35742
+adb connect 192.168.1.6:46513
+# 设置最大子进程是65536
+adb shell device_config set_sync_disabled_for_tests persistent
+adb shell device_config put activity_manager max_phantom_processes 65536
+
+
+

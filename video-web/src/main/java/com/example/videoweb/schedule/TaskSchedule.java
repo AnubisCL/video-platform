@@ -59,14 +59,16 @@ public class TaskSchedule {
                     .orderByDesc(Task::getUpdateDate)
                     .list();
 
-            for (Task task : taskList) {
-                Task updateTask = new Task();
-                updateTask.setTaskId(task.getTaskId());
-                updateTask.setTaskStatus(TaskStatusEnum.PUSHING.getCode());
-                taskService.updateById(updateTask);
+            taskList.forEach(task -> {
+                videoExecutor.execute(() -> {
+                    Task updateTask = new Task();
+                    updateTask.setTaskId(task.getTaskId());
+                    updateTask.setTaskStatus(TaskStatusEnum.PUSHING.getCode());
+                    taskService.updateById(updateTask);
 
-                taskService.pushHlsVideoStreams(task);
-            }
+                    taskService.pushHlsVideoStreams(task);
+                });
+            });
             log.info(" --- pushHlsVideoStreamsSchedule end --- ");
         } finally {
             lock.unlock();

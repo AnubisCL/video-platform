@@ -14,7 +14,12 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +54,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     @Value("${ffmpeg.hls-time}") private String ffmpegHlsTime;
     @Resource private IVideoService videoService;
     @Resource private TaskMapper taskMapper;
+
+    @Resource private PlatformTransactionManager transactionManager;
 
     @Override
     @Transactional
@@ -96,7 +103,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void pushMp4VideoStreams(Task task) {
         Task updateTask = new Task();
         updateTask.setTaskId(task.getTaskId());
@@ -125,7 +132,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void pushHlsVideoStreams(Task task) {
         Video video = new Video();
         video.setTitle(task.getTaskName());
@@ -143,30 +150,42 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         String replaceGifPath = outputGifPath.replace(BASE_DIR, gifSuffix);
         video.setImageUrl(replaceGifPath);
         video.setHlsUrl("");
-        videoService.save(video);
+        String loadDirectory = null;
+        try {
+            videoService.save(video);
 
-        String loadDirectory = createDateDirectory(HLS_DIR, String.valueOf(video.getVideoId()));
-        String replaceVideoPath = m3u8Suffix + video.getVideoId() + File.separator + INDEX_M3U8;
-        Video videoUpdate = new Video();
-        videoUpdate.setVideoId(video.getVideoId());
-        videoUpdate.setHlsUrl(replaceVideoPath);
-        videoService.updateById(videoUpdate);
+            loadDirectory = createDateDirectory(HLS_DIR, String.valueOf(video.getVideoId()));
+            String replaceVideoPath = m3u8Suffix + video.getVideoId() + File.separator + INDEX_M3U8;
+            Video videoUpdate = new Video();
+            videoUpdate.setVideoId(video.getVideoId());
+            videoUpdate.setHlsUrl(replaceVideoPath);
+            videoService.updateById(videoUpdate);
 
-        //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 output.m3u8
-        //ffmpeg -i input.mp4 -hls_time 10 -hls_list_size 0 -hls_segment_filename output_%03d.ts output.m3u8
-        boolean executeCommand = ProcessUtil.executeCommand(
-                Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
-                        "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", loadDirectory + File.separator +  INDEX_M3U8)
-        ); //"-hls_wrap", "0",
+            //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 output.m3u8
+            //ffmpeg -i input.mp4 -hls_time 10 -hls_list_size 0 -hls_segment_filename output_%03d.ts output.m3u8
+            boolean executeCommand = ProcessUtil.executeCommand(
+                    Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
+                            "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", loadDirectory + File.separator + INDEX_M3U8)
+            ); //"-hls_wrap", "0",
 
-        Task updateTask = new Task();
-        updateTask.setTaskId(task.getTaskId());
-        if (executeCommand) {
-            updateTask.setTaskStatus(TaskStatusEnum.PUSH_COMPLETE.getCode());
-        } else {
-            updateTask.setTaskStatus(TaskStatusEnum.PUSH_FAIL.getCode());
+            Task updateTask = new Task();
+            updateTask.setTaskId(task.getTaskId());
+            if (executeCommand) {
+                updateTask.setTaskStatus(TaskStatusEnum.PUSH_COMPLETE.getCode());
+            } else {
+                updateTask.setTaskStatus(TaskStatusEnum.PUSH_FAIL.getCode());
+            }
+            taskMapper.updateById(updateTask);
+        } catch (Exception e) {
+            log.error("pushHlsVideoStreams error : {}", e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            log.error("clean loadDirectory : {}", loadDirectory);
+            cleanLoadDirectory(loadDirectory);
         }
-        taskMapper.updateById(updateTask);
+    }
+
+    private void cleanLoadDirectory(String loadDirectory) {
+        //删除一个目录
     }
 
     public static String formatSecondsToMinutesAndSeconds(double seconds) {

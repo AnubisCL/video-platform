@@ -126,3 +126,42 @@ if ! echo "$(jps -l)" | grep -q "$JAR_NAME"; then
     # 切换目录再执行shell，避免日志输出到当前目录
     (cd /home/webui/video-platform && ./main.sh restart) &> /dev/null &
 fi
+
+# 检查Grafana服务状态
+GRAFANA_PID=$(pgrep grafana)
+if [ -n "$GRAFANA_PID" ]; then
+    echo "Grafana is running. PID: $GRAFANA_PID"
+else
+    service grafana-server restart
+fi
+
+
+PROMETHEUS_GREP=$(ps -ef | grep -v grep | grep prometheu)
+PROMETHEUS="prometheus-2.54.0-rc.0.linux-arm64"
+NODE_EXPORTER="node_exporter-1.8.2.linux-arm64"
+MYSQLD_EXPORTER="mysqld_exporter-0.15.1.linux-arm64"
+NGINX_EXPORTER="nginx-prometheus-exporter-1.3.0.linux-arm64"
+# 检查Prometheus服务状态
+if ! echo "$PROMETHEUS_GREP" | grep -q "$PROMETHEUS"; then
+    echo "The $PROMETHEUS process is not running. Starting it now..."
+    # 切换目录再执行shell，避免日志输出到当前目录
+    (cd /home/prometheus/prometheus-2.54.0-rc.0.linux-arm64 && ./main-prometheus.sh restart) &> /dev/null &
+fi
+# 检查Node Exporter服务状态
+if ! echo "$PROMETHEUS_GREP" | grep -q "$NODE_EXPORTER"; then
+    echo "The $NODE_EXPORTER process is not running. Starting it now..."
+    # 切换目录再执行shell，避免日志输出到当前目录
+    (cd /home/prometheus/node_exporter-1.8.2.linux-arm64 && ./main-nodeExporter.sh restart) &> /dev/null &
+fi
+# 检查Mysqld Exporter服务状态
+if ! echo "$PROMETHEUS_GREP" | grep -q "$MYSQLD_EXPORTER"; then
+    echo "The $MYSQLD_EXPORTER process is not running. Starting it now..."
+    # 切换目录再执行shell，避免日志输出到当前目录
+    (cd /home/prometheus/mysqld_exporter-0.15.1.linux-arm64 && ./main-mysqldExporter.sh restart) &> /dev/null &
+fi
+# 检查Nginx Exporter服务状态
+if ! echo "$PROMETHEUS_GREP" | grep -q "$NGINX_EXPORTER"; then
+    echo "The $NGINX_EXPORTER process is not running. Starting it now..."
+    # 切换目录再执行shell，避免日志输出到当前目录
+    (cd /home/prometheus/nginx-prometheus-exporter-1.3.0.linux-arm64 && ./main-nginxExporter.sh restart) &> /dev/null &
+fi
