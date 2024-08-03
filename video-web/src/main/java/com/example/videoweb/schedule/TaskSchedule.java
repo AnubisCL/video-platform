@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -51,7 +52,15 @@ public class TaskSchedule {
 
     @Scheduled(cron = "${schedule.cron.pushHlsVideoStreams}")
     public void pushHlsVideoStreamsSchedule() {
-        lock.lock();
+        try {
+            if (!lock.tryLock(5, TimeUnit.SECONDS)) {
+                log.error("Failed to acquire lock after 5 seconds, skipping this execution.");
+                return;
+            }
+        } catch (InterruptedException e) {
+            log.error("Failed to tryLock error : {}", e.getMessage());
+            return;
+        }
         try {
             log.info(" --- pushHlsVideoStreamsSchedule start --- ");
             List<Task> taskList = taskService.lambdaQuery()
