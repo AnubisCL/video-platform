@@ -45,5 +45,7 @@ adb connect 192.168.1.6:46513
 adb shell device_config set_sync_disabled_for_tests persistent
 adb shell device_config put activity_manager max_phantom_processes 65536
 
+# ffmpeg
+ps -ef | grep -v grep | grep ffmpeg
 
 
