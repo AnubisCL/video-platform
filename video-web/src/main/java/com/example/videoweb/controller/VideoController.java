@@ -53,9 +53,9 @@ public class VideoController {
         PageDto pageDto = videoDto.getPage();
         Page<Video> page = Page.of(pageDto.getCurrent(), pageDto.getSize());
         if (pageDto.getSortBy().isEmpty()) {
-            page.addOrder(OrderItem.desc("update_date"));
+            page.addOrder(OrderItem.descs("video_id","update_date"));
         } else {
-            page.addOrder(pageDto.getAsc() ? OrderItem.asc(pageDto.getSortBy()) : OrderItem.desc(pageDto.getSortBy()));
+            page.addOrder(pageDto.getAsc() ? OrderItem.ascs("video_id", pageDto.getSortBy()) : OrderItem.descs("video_id", pageDto.getSortBy()));
         }
         // todo：VideoDto
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<Video>()

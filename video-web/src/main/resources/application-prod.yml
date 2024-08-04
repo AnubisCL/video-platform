@@ -1,7 +1,7 @@
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://127.0.0.1:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.1.6:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: 1q2w3e4R!@
     hikari:
@@ -20,16 +20,16 @@ nginx-config:
   protocol-type:
     local:
       name: local
-      local-ipv4-url: http://127.0.0.1:8080 # 环回地址IPV4
+      local-ipv4-url: http://127.0.0.1:8087 # 环回地址IPV4 数据中存的
     ipv4:
       name: ipv4
-      replace-ipv4: http://192.168.2.122:8080 # 局域网IPV4
+      replace-ipv4: http://192.168.1.6:8087 # 局域网IPV4
     ipv6:
       name: ipv6
-      replace-ipv6: http://[240e:473:810:2af2:2882:13ff:fef2:2589]:8080 # 电信公网IPV6
-  m3u8-suffix: http://127.0.0.1:8080/hls/
-  mp4-suffix: http://127.0.0.1:8080/back/video/
-  gif-suffix: http://127.0.0.1:8080/back/video/
+      replace-ipv6: http://[240e:473:810:2af2:2882:13ff:fef2:2589]:8087 # 电信公网IPV6
+  m3u8-suffix: http://192.168.1.6:8087/hls/
+  mp4-suffix: http://192.168.1.6:8087/back/video/
+  gif-suffix: http://192.168.1.6:8087/back/video/
 
 ############## thread-pool 配置 ##############
 thread-pool:
@@ -43,8 +43,8 @@ thread-pool:
 ############## schedule 配置 ##############
 schedule:
   cron:
-    downloadVideo: '0 0 0,14,15,16,17,22,23,21 * * ?'
-    pushHlsVideoStreams: '0 0 * * * ?'
+    downloadVideo: '0 0 0 * * ?'
+    pushHlsVideoStreams: '0 0 0 * * ?'
     cleanDownloadVideo: '0 0 0 * * ?'
 
 ############## mybatis-plus 配置 (文档: https://baomidou.com/introduce/) ##############
@@ -56,7 +56,8 @@ mybatis-plus:
   # 启动时是否检查 MyBatis XML 文件的存在，默认不检查。
   check-config-location: false
   configuration:
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    # log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     banner: false
     db-config:
