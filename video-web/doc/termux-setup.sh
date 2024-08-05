@@ -31,6 +31,8 @@ vim ~/.bashrc
 echo "用户: "$(whoami)
 echo "正在登录ubuntu"
 proot-distro login ubuntu
+# ubuntu 映射的目录
+/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu
 
 # ipv6 (su)
 ip -6 addr show
