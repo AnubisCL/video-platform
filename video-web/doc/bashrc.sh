@@ -148,11 +148,11 @@ if ! echo "$PROMETHEUS_GREP" | grep -q "$PROMETHEUS"; then
     (cd /home/prometheus/prometheus-2.54.0-rc.0.linux-arm64 && ./main-prometheus.sh restart) &> /dev/null &
 fi
 # 检查Node Exporter服务状态
-if ! echo "$PROMETHEUS_GREP" | grep -q "$NODE_EXPORTER"; then
-    echo "The $NODE_EXPORTER process is not running. Starting it now..."
-    # 切换目录再执行shell，避免日志输出到当前目录
-    (cd /home/prometheus/node_exporter-1.8.2.linux-arm64 && ./main-nodeExporter.sh restart) &> /dev/null &
-fi
+#if ! echo "$PROMETHEUS_GREP" | grep -q "$NODE_EXPORTER"; then
+#    echo "The $NODE_EXPORTER process is not running. Starting it now..."
+#     切换目录再执行shell，避免日志输出到当前目录
+#    (cd /home/prometheus/node_exporter-1.8.2.linux-arm64 && ./main-nodeExporter.sh restart) &> /dev/null &
+#fi
 # 检查Mysqld Exporter服务状态
 if ! echo "$PROMETHEUS_GREP" | grep -q "$MYSQLD_EXPORTER"; then
     echo "The $MYSQLD_EXPORTER process is not running. Starting it now..."

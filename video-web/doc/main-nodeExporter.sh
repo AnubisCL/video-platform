@@ -4,7 +4,10 @@
 BASE_DIR="/home/prometheus/node_exporter-1.8.2.linux-arm64"
 NODE_EXPORTER_PATH="$BASE_DIR/node_exporter"
 LOG_FILE="$BASE_DIR/node_exporter.log"
-node_exporter --web.listen-address=:9100
+
+# Termux 内使用 proot-distro 安装ubuntu 监控的数据不准确，所以使用 Magisk 提供的 “su -c” 命令到安卓系统启动 node_exporter
+#./node_exporter --web.listen-address=:9100
+
 # 启动 Node Exporter
 start_node_exporter() {
     $NODE_EXPORTER_PATH --web.listen-address=:9100

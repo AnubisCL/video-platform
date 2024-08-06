@@ -9,10 +9,10 @@ pkg install vim git wget curl -y
 
 # 启动
 vim $PREFIX/etc/motd
- _____                              
+ _____
 |_   _|__ _ __ _ __ ___  _   ___  __
   | |/ _ \ '__| '_ ` _ \| | | \ \/ /
-  | |  __/ |  | | | | | | |_| |>  < 
+  | |  __/ |  | | | | | | |_| |>  <
   |_|\___|_|  |_| |_| |_|\___</_/\_\
   
   Put wings on your dreams!
@@ -51,3 +51,11 @@ adb shell device_config put activity_manager max_phantom_processes 65536
 ps -ef | grep -v grep | grep ffmpeg
 
 
+# 检查Node Exporter服务状态
+NODE_EXPORTER_PID=$(pgrep -f node_exporter)
+if [ -n "$NODE_EXPORTER_PID" ]; then
+  echo "The node_exporter process is running. PID : $NODE_EXPORTER_PID"
+else
+  # 切换目录再执行shell，避免日志输出到当前目录
+  (cd ~/../usr/var/lib/proot-distro/installed-rootfs/ubuntu/home/prometheus/node_exporter-1.8.2.linux-arm64 && su -c "./node_exporter --web.listen-address=:9100" & ) &> /dev/null &
+fi
