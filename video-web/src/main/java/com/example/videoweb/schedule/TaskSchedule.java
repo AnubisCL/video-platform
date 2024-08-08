@@ -6,6 +6,7 @@ import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.service.ITaskService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ public class TaskSchedule {
     @Resource private ITaskService taskService;
 
 
+    @Async
     @Scheduled(cron = "${schedule.cron.downloadVideo}")
     public void downloadVideoSchedule() {
         log.info(" --- downloadVideoSchedule start --- ");
@@ -50,6 +52,7 @@ public class TaskSchedule {
 
     private final ReentrantLock lock = new ReentrantLock();
 
+    @Async
     @Scheduled(cron = "${schedule.cron.pushHlsVideoStreams}")
     public void pushHlsVideoStreamsSchedule() {
         try {
