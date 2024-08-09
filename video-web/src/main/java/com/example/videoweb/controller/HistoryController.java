@@ -38,13 +38,14 @@ public class HistoryController {
                 .eq(History::getUserId, userId).one();
         Optional.ofNullable(histories).ifPresentOrElse(history -> {
             historyService.lambdaUpdate().eq(History::getHistoryId, histories.getHistoryId())
-                    .eq(History::getVideoId, videoId).eq(History::getUserId, userId)
+                    .eq(History::getVideoId, Long.valueOf(videoId)).eq(History::getUserId, userId)
                     .set(History::getCount, histories.getCount() + 1)
                     .set(History::getStatus, StatusEnum.YES.getStatus())
                     .update();
         }, () -> {
             History history = new History();
             history.setVideoId(Long.valueOf(videoId));
+            history.setCount(0L);
             history.setUserId(userId);
             historyService.save(history);
         });
@@ -53,7 +54,7 @@ public class HistoryController {
 
     @GetMapping("count/{videoId}")
     public ResultVo count(@PathVariable(value = "videoId") String videoId) {
-        return ResultVo.data(historyService.lambdaQuery().eq(History::getStatus, StatusEnum.YES.getStatus()).eq(History::getVideoId, videoId).count());
+        return ResultVo.data(historyService.lambdaQuery().eq(History::getStatus, StatusEnum.YES.getStatus()).eq(History::getVideoId, Long.valueOf(videoId)).one().getCount());
     }
 
 }

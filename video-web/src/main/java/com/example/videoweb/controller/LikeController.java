@@ -74,12 +74,12 @@ public class LikeController {
     public ResultVo removeLike(@PathVariable(value = "videoId") String videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<Like> list = likeService.lambdaQuery().eq(Like::getStatus, StatusEnum.YES.getStatus())
-                .eq(Like::getVideoId, videoId)
+                .eq(Like::getVideoId, Long.valueOf(videoId))
                 .eq(Like::getUserId, userId).list();
         if (!list.isEmpty()) {
-            likeService.lambdaUpdate().eq(Like::getVideoId, videoId)
+            likeService.lambdaUpdate().eq(Like::getVideoId, Long.valueOf(videoId))
                     .eq(Like::getUserId, userId)
-                    .eq(Like::getStatus, StatusEnum.NO.getStatus())
+                    .set(Like::getStatus, StatusEnum.NO.getStatus())
                     .update();
         }
         return ResultVo.data(!list.isEmpty());
@@ -89,7 +89,7 @@ public class LikeController {
     public ResultVo isLike(@PathVariable(value = "videoId") String videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<Like> list = likeService.lambdaQuery().eq(Like::getStatus, StatusEnum.YES.getStatus())
-                .eq(Like::getVideoId, videoId).eq(Like::getUserId, userId).list();
+                .eq(Like::getVideoId, Long.valueOf(videoId)).eq(Like::getUserId, userId).list();
         return ResultVo.data(!list.isEmpty());
     }
 

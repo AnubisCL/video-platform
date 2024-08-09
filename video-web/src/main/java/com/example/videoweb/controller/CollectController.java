@@ -33,11 +33,11 @@ public class CollectController {
     public ResultVo doCollect(@PathVariable(value = "videoId") String videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<Collect> list = collectService.lambdaQuery()
-                .eq(Collect::getVideoId, videoId)
+                .eq(Collect::getVideoId, Long.valueOf(videoId))
                 .eq(Collect::getUserId, userId).list();
         if (!list.isEmpty()) {
             collectService.lambdaUpdate().eq(Collect::getCollectId, list.get(0).getCollectId())
-                    .eq(Collect::getVideoId, videoId).eq(Collect::getUserId, userId)
+                    .eq(Collect::getVideoId, Long.valueOf(videoId)).eq(Collect::getUserId, userId)
                     .set(Collect::getStatus, StatusEnum.YES.getStatus())
                     .update();
         } else {
@@ -53,12 +53,12 @@ public class CollectController {
     public ResultVo removeCollect(@PathVariable(value = "videoId") String videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<Collect> list = collectService.lambdaQuery().eq(Collect::getStatus, StatusEnum.YES.getStatus())
-                .eq(Collect::getVideoId, videoId)
+                .eq(Collect::getVideoId, Long.valueOf(videoId))
                 .eq(Collect::getUserId, userId).list();
         if (!list.isEmpty()) {
-            collectService.lambdaUpdate().eq(Collect::getVideoId, videoId)
+            collectService.lambdaUpdate().eq(Collect::getVideoId, Long.valueOf(videoId))
                     .eq(Collect::getUserId, userId)
-                    .eq(Collect::getStatus, StatusEnum.NO.getStatus())
+                    .set(Collect::getStatus, StatusEnum.NO.getStatus())
                     .update();
         }
         return ResultVo.data(!list.isEmpty());
@@ -68,7 +68,7 @@ public class CollectController {
     public ResultVo isCollect(@PathVariable(value = "videoId") String videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<Collect> list = collectService.lambdaQuery().eq(Collect::getStatus, StatusEnum.YES.getStatus())
-                .eq(Collect::getVideoId, videoId).eq(Collect::getUserId, userId).list();
+                .eq(Collect::getVideoId, Long.valueOf(videoId)).eq(Collect::getUserId, userId).list();
         return ResultVo.data(!list.isEmpty());
     }
 
