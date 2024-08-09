@@ -42,6 +42,9 @@ public class User {
     @Schema(description = "用户邮箱")
     private String email;
 
+    @Schema(description = "用户头像")
+    private String avatarBase64;
+
     @Schema(description = "0:正常,1:锁定")
     private Integer status;
 

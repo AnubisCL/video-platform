@@ -1,7 +1,7 @@
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.1.6:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.2.169:3306/video_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: 1q2w3e4R!@
     hikari:
@@ -67,10 +67,10 @@ mybatis-plus:
 ############## springdoc 配置 (文档: https://openapi.apifox.cn/) ##############
 springdoc:
   api-docs:
-    enabled: false
+    enabled: true
     path: /v3/api-docs
   swagger-ui:
-    enabled: false
+    enabled: true
     path: /swagger-ui.html
 
 ############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
