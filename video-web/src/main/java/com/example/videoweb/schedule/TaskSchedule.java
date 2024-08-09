@@ -96,7 +96,6 @@ public class TaskSchedule {
     //@Scheduled(cron = "${schedule.cron.cleanDownloadVideo}")
     public void cleanDownloadVideoSchedule() {
         log.info(" --- cleanDownloadVideoSchedule start --- ");
-        //todo：del /temp/video
         log.info(" --- cleanDownloadVideoSchedule end --- ");
     }
 

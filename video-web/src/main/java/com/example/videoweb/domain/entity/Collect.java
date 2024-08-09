@@ -24,7 +24,7 @@ import lombok.Setter;
 @Schema(name = "Collect", description = "用户收藏表")
 public class Collect {
 
-    @Schema(description = "点赞Id")
+    @Schema(description = "收藏Id")
     @TableId(value = "collect_id", type = IdType.AUTO)
     private Long collectId;
 

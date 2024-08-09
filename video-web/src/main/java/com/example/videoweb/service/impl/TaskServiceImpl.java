@@ -126,7 +126,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         video.setDescription("时长: " + formatSecondsToMinutesAndSeconds(Double.parseDouble(totalSeconds)) + "，帧数: " + frame);
         String replaceVideoPath = outputVideoPath.replace(BASE_DIR, mp4Suffix);
         String replaceGifPath = outputGifPath.replace(BASE_DIR, gifSuffix);
-        video.setHlsUrl(replaceVideoPath); // fixme：推流m3u8
+        video.setHlsUrl(replaceVideoPath);
         video.setImageUrl(replaceGifPath);
         videoService.save(video);
     }

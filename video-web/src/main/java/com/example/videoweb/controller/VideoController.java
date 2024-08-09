@@ -1,16 +1,23 @@
 package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.videoweb.domain.dto.PageDto;
 import com.example.videoweb.domain.dto.VideoDto;
+import com.example.videoweb.domain.entity.Collect;
+import com.example.videoweb.domain.entity.History;
+import com.example.videoweb.domain.entity.Like;
 import com.example.videoweb.domain.entity.Video;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.PageVo;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.domain.vo.VideoVo;
+import com.example.videoweb.service.ICollectService;
+import com.example.videoweb.service.IHistoryService;
+import com.example.videoweb.service.ILikeService;
 import com.example.videoweb.service.IVideoService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,11 +25,15 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -40,6 +51,9 @@ import java.util.List;
 public class VideoController {
 
     @Resource private IVideoService videoService;
+    @Resource private ICollectService collectService;
+    @Resource private ILikeService likeService;
+    @Resource private IHistoryService historyService;
 
     @Value("${nginx-config.protocol-type.local.name}") private String local;
     @Value("${nginx-config.protocol-type.local.local-ipv4-url}") private String localIpv4Url;
@@ -50,6 +64,7 @@ public class VideoController {
 
     @PostMapping("getVideoList")
     public ResultVo getVideoList(@Valid @RequestBody VideoDto videoDto, HttpServletRequest request) {
+        Long userId = StpUtil.getLoginIdAsLong();
         PageDto pageDto = videoDto.getPage();
         Page<Video> page = Page.of(pageDto.getCurrent(), pageDto.getSize());
         if (pageDto.getSortBy().isEmpty()) {
@@ -57,14 +72,38 @@ public class VideoController {
         } else {
             page.addOrder(pageDto.getAsc() ? OrderItem.ascs("video_id", pageDto.getSortBy()) : OrderItem.descs("video_id", pageDto.getSortBy()));
         }
-        // todo：VideoDto
+
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<Video>()
                 .eq(Video::getStatus, StatusEnum.YES.getStatus());
-
+        //关键词搜索
         if (!StringUtils.isEmpty(videoDto.getKeyword())) {
             queryWrapper.like(Video::getTitle, videoDto.getKeyword()).or()
                     .like(Video::getDescription, videoDto.getKeyword());
         }
+        //收藏
+        Optional.ofNullable(videoDto.getIsCollect()).ifPresent(isCollect -> {
+            if (isCollect) {
+                List<Collect> collects = collectService.lambdaQuery().eq(Collect::getStatus, StatusEnum.YES.getStatus())
+                        .eq(Collect::getUserId, userId).list();
+                queryWrapper.in(Video::getVideoId, collects.stream().map(Collect::getVideoId));
+            }
+        });
+        //喜欢
+        Optional.ofNullable(videoDto.getIsLike()).ifPresent(isLike -> {
+            if (isLike) {
+                List<Like> likes = likeService.lambdaQuery().eq(Like::getStatus, StatusEnum.YES.getStatus())
+                        .eq(Like::getUserId, userId).list();
+                queryWrapper.in(Video::getVideoId, likes.stream().map(Like::getVideoId));
+            }
+        });
+        //历史记录
+        Optional.ofNullable(videoDto.getIsHistory()).ifPresent(isHistory -> {
+            if (isHistory) {
+                List<History> histories = historyService.lambdaQuery().eq(History::getStatus, StatusEnum.YES.getStatus())
+                        .eq(History::getUserId, userId).list();
+                queryWrapper.in(Video::getVideoId, histories.stream().map(History::getVideoId));
+            }
+        });
 
         String protocolType = getIpAddressProtocolType(request);
 

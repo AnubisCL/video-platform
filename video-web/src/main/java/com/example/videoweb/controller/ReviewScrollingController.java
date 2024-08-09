@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @SaCheckLogin
 @RestController
-@RequestMapping("/reviewScrolling")
+@RequestMapping("/reviewScrolling/")
 public class ReviewScrollingController {
+
+    //todo：不区分视频的评论和视频的弹幕，要和视频时间关联加载弹幕
+
 
 }

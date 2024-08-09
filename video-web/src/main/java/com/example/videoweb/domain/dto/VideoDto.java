@@ -21,5 +21,11 @@ public class VideoDto {
     private PageDto page;
     @Schema(description = "搜索词")
     private String keyword;
+    @Schema(description = "是否查询收藏")
+    private Boolean isCollect;
+    @Schema(description = "是否查询点赞")
+    private Boolean isLike;
+    @Schema(description = "是否查询历史记录")
+    private Boolean isHistory;
 
 }
