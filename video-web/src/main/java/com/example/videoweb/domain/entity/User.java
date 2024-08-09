@@ -1,15 +1,10 @@
 package com.example.videoweb.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -22,6 +17,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName("v_user")
 @Schema(name = "User", description = "用户表")
 public class User {
@@ -43,7 +40,7 @@ public class User {
     private String email;
 
     @Schema(description = "用户头像")
-    private String avatarBase64;
+    private byte[] avatarBlob;
 
     @Schema(description = "0:正常,1:锁定")
     private Integer status;
