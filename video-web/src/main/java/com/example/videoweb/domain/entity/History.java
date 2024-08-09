@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("v_history")
-@Schema(name = "History", description = "")
+@Schema(name = "History", description = "历史记录")
 public class History {
 
     @Schema(description = "历史记录Id")
@@ -33,6 +33,9 @@ public class History {
 
     @Schema(description = "用户Id")
     private Long userId;
+
+    @Schema(description = "观看次数")
+    private Long count;
 
     @Schema(description = "0:正常,1:失效")
     private Integer status;
