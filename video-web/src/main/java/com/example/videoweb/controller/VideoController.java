@@ -122,7 +122,7 @@ public class VideoController {
                     if (protocolType.equals(ipv6)) {
                         builder.imageUrl(video.getImageUrl().replace(localIpv4Url, replaceIpv6))
                                 .videoUrl(video.getHlsUrl().replace(localIpv4Url, replaceIpv6));
-                    } else if (protocolType.equals(ipv4)) {
+                    } else if (protocolType.equals(ipv4) || protocolType.equals(local)) {
                         builder.imageUrl(video.getImageUrl().replace(localIpv4Url, replaceIpv4))
                                 .videoUrl(video.getHlsUrl().replace(localIpv4Url, replaceIpv4));
                     } else if (protocolType.equals(local)) {
