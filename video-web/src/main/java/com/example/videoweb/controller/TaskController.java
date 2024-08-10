@@ -117,7 +117,7 @@ public class TaskController {
             result.put("nginx_exporter 地址", "http://[" + info.getIpv6() + "]:9113");
             result.put("ssh 地址", "ssh [u0_a373]@[" + info.getIpv6() + "]:[8022]");
         }
-        return ResultVo.data(JSON.toJSONString(result));
+        return ResultVo.data(result);
     }
 
 
