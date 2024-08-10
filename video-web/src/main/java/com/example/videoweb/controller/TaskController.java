@@ -101,6 +101,25 @@ public class TaskController {
         return ResultVo.data(JSON.toJSONString(info));
     }
 
+    @GetMapping("/getIpv6Url")
+    public ResultVo getIpv6Url() {
+        HashMap<String, String> result = new HashMap<>();
+        ipInfoSchedule.updateIpv4AndIpv6Schedule();
+        IpInfo info = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
+        if (info.getIsIpv6()) {
+            result.put("前端地址", "http://[" + info.getIpv6() + "]:3000");
+            result.put("后端API-DOC 地址", "http://[" + info.getIpv6() + "]:7077/swagger-ui.html");
+            result.put("Nginx 地址", "http://[" + info.getIpv6() + "]:8080");
+            result.put("Grafana 地址", "http://[" + info.getIpv6() + "]:9091/login");
+            result.put("Prometheus 地址", "http://[" + info.getIpv6() + "]:9090");
+            result.put("node_exporter 地址", "http://[" + info.getIpv6() + "]:9100");
+            result.put("mysql_exporter 地址", "http://[" + info.getIpv6() + "]:9104");
+            result.put("nginx_exporter 地址", "http://[" + info.getIpv6() + "]:9113");
+            result.put("ssh 地址", "ssh [u0_a373]@[" + info.getIpv6() + "]:[8022]");
+        }
+        return ResultVo.data(JSON.toJSONString(result));
+    }
+
 
 
 
