@@ -6,6 +6,7 @@ import com.example.videoweb.base.utils.IpUtil;
 import com.example.videoweb.base.utils.ProcessUtil;
 import com.example.videoweb.domain.cache.IpInfo;
 import io.micrometer.common.util.StringUtils;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.Cache;
@@ -33,6 +34,11 @@ public class IpInfoSchedule {
     @Value("${nginx-config.protocol-type.ipv4.lan-name}")
     private String ipv4LanName;
     @Resource @Qualifier("ehCacheManager") private CacheManager ehCacheManager;
+
+    @PostConstruct
+    private void init() {
+        updateIpv4AndIpv6Schedule();
+    }
 
     @Scheduled(cron = "${schedule.cron.updateIpv4AndIpv6}")
     public void updateIpv4AndIpv6Schedule() {
