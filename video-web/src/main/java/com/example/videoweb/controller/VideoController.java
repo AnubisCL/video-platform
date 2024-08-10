@@ -5,6 +5,8 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.videoweb.base.config.CacheConfig;
+import com.example.videoweb.domain.cache.IpInfo;
 import com.example.videoweb.domain.dto.PageDto;
 import com.example.videoweb.domain.dto.VideoDto;
 import com.example.videoweb.domain.entity.Collect;
@@ -23,6 +25,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.ehcache.CacheManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,13 +58,13 @@ public class VideoController {
     @Resource private ICollectService collectService;
     @Resource private ILikeService likeService;
     @Resource private IHistoryService historyService;
+    @Resource @Qualifier("ehCacheManager") private CacheManager cacheManager;
 
     @Value("${nginx-config.protocol-type.local.name}") private String local;
-    @Value("${nginx-config.protocol-type.local.local-ipv4-url}") private String localIpv4Url;
+    @Value("${nginx-config.protocol-type.local.local-ipv4-ip}") private String localIp;
     @Value("${nginx-config.protocol-type.ipv4.name}") private String ipv4;
-    @Value("${nginx-config.protocol-type.ipv4.replace-ipv4}") private String replaceIpv4;
     @Value("${nginx-config.protocol-type.ipv6.name}") private String ipv6;
-    @Value("${nginx-config.protocol-type.ipv6.replace-ipv6}") private String replaceIpv6;
+
     //todo：
     // 1.自动获取内网Ipv4地址，
     //  1.1. proot-distro ubuntu 可以获取到 ifconfig - wlan0 - inet
@@ -113,18 +117,21 @@ public class VideoController {
         });
 
         String protocolType = getIpAddressProtocolType(request);
+        IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
 
         Page<Video> resultPage = videoService.page(page, queryWrapper);
         List<VideoVo> records = resultPage.getRecords()
                 .stream().map(video -> {
                     VideoVo.VideoVoBuilder builder = VideoVo.builder();
                     builder.videoId(video.getVideoId()).title(video.getTitle());
-                    if (protocolType.equals(ipv6)) {
-                        builder.imageUrl(video.getImageUrl().replace(localIpv4Url, replaceIpv6))
-                                .videoUrl(video.getHlsUrl().replace(localIpv4Url, replaceIpv6));
-                    } else if (protocolType.equals(ipv4) || protocolType.equals(local)) {
-                        builder.imageUrl(video.getImageUrl().replace(localIpv4Url, replaceIpv4))
-                                .videoUrl(video.getHlsUrl().replace(localIpv4Url, replaceIpv4));
+                    if (protocolType.equals(ipv6) && ipInfo.getIsIpv6()) {
+                        String replaceIpv6 = "[" + ipInfo.getIpv6() + "]";
+                        builder.imageUrl(video.getImageUrl().replace(localIp, replaceIpv6))
+                                .videoUrl(video.getHlsUrl().replace(localIp, replaceIpv6));
+                    }
+                    if ((protocolType.equals(ipv4) || protocolType.equals(local)) && ipInfo.getIsIpv4()) {
+                        builder.imageUrl(video.getImageUrl().replace(localIp, ipInfo.getIpv4()))
+                                .videoUrl(video.getHlsUrl().replace(localIp, ipInfo.getIpv4()));
                     } else if (protocolType.equals(local)) {
                         builder.imageUrl(video.getImageUrl()).videoUrl(video.getHlsUrl());
                     }

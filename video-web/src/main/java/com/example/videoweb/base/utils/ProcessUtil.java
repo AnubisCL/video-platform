@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: chailei
@@ -137,7 +138,7 @@ public class ProcessUtil {
                     while ((line = reader.readLine()) != null) {
                         log.error("Error from process: {}", line);
                     }
-                    result.append("2"); //错误则返回默认值 2秒
+                    result.append("");
                 } catch (IOException e) {
                     log.error("Error reading from process error stream: {}", e.getMessage());
                 }
@@ -166,6 +167,77 @@ public class ProcessUtil {
     }
 
 
+    public static String executeCommandWithResult(List<String> command, long timeout, TimeUnit timeUnit) {
+        StringBuilder result = threadLocalResult.get();
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        try {
+            Process process = processBuilder.start();
+            // 创建线程读取标准输出
+            Thread stdoutThread = new Thread(() -> {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    StringBuilder output = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        output.append(line).append("\n");
+                    }
+                    result.append(output.toString().trim());
+                } catch (IOException e) {
+                    log.error("Error reading from process output: {}", e.getMessage());
+                }
+            });
+
+            // 创建线程读取错误输出
+            Thread stderrThread = new Thread(() -> {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        log.error("Error from process: {}", line);
+                    }
+                    result.append("");
+                } catch (IOException e) {
+                    log.error("Error reading from process error stream: {}", e.getMessage());
+                }
+            });
+
+            stdoutThread.start();
+            stderrThread.start();
+
+            boolean timedOut = false;
+            try {
+                // 等待进程结束或超时
+                if (!process.waitFor(timeout, timeUnit)) {
+                    timedOut = true;
+                }
+            } catch (InterruptedException e) {
+                log.error("Interrupted while waiting for process: {}", e.getMessage());
+                Thread.currentThread().interrupt(); // Restore interrupted status
+            }
+
+            if (timedOut) {
+                // 如果超时，则终止进程
+                process.destroyForcibly();
+                stdoutThread.interrupt();
+                stderrThread.interrupt();
+                throw new RuntimeException("Command execution timed out.");
+            }
+
+            // 确保读取输出的线程也已经完成
+            stdoutThread.join();
+            stderrThread.join();
+
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                readAndLogErrorStream(process);
+                throw new RuntimeException("Command failed with exit code: " + exitCode);
+            }
+            return result.toString();
+        } catch (IOException | InterruptedException | RuntimeException e) {
+            log.error("Error executing command: {}", e.getMessage());
+            return "";
+        } finally {
+            threadLocalResult.remove();
+        }
+    }
 
     private static void readAndLogErrorStream(Process process) throws IOException {
         BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));

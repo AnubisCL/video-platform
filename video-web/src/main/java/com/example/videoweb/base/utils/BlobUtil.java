@@ -12,7 +12,7 @@ import java.util.Base64;
  * @Author: chailei
  * @Date: 2024/8/9 14:34
  */
-public class BlobUtils {
+public class BlobUtil {
 
     /**
      * 将 Blob 对象转换为 Base64 编码的字符串。

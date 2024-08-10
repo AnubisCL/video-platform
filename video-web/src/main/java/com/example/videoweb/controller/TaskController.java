@@ -1,14 +1,19 @@
 package com.example.videoweb.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.example.videoweb.base.config.CacheConfig;
+import com.example.videoweb.domain.cache.IpInfo;
 import com.example.videoweb.domain.entity.Task;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.domain.vo.ResultVo;
+import com.example.videoweb.schedule.IpInfoSchedule;
 import com.example.videoweb.schedule.TaskSchedule;
 import com.example.videoweb.service.ITaskService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.ehcache.CacheManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +40,8 @@ public class TaskController {
 
     @Resource private ITaskService taskService;
     @Resource private TaskSchedule taskSchedule;
+    @Resource private IpInfoSchedule ipInfoSchedule;
+    @Resource @Qualifier("ehCacheManager") private CacheManager cacheManager;
 
     @PostMapping("/insertTaskTxt")
     public ResultVo insertTaskTxt(@RequestParam("file") MultipartFile file) {
@@ -85,6 +92,13 @@ public class TaskController {
     public ResultVo pushHlsVideoStreams() {
         taskSchedule.pushHlsVideoStreamsSchedule();
         return ResultVo.ok("执行成功");
+    }
+
+    @GetMapping("/updateIpv4AndIpv6Schedule")
+    public ResultVo updateIpv4AndIpv6Schedule() {
+        ipInfoSchedule.updateIpv4AndIpv6Schedule();
+        IpInfo info = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
+        return ResultVo.data(JSON.toJSONString(info));
     }
 
 

@@ -27,7 +27,6 @@ public class TaskSchedule {
     @Resource private ThreadPoolTaskExecutor videoExecutor;
     @Resource private ITaskService taskService;
 
-
     @Async
     @Scheduled(cron = "${schedule.cron.downloadVideo}")
     public void downloadVideoSchedule() {

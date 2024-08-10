@@ -2,7 +2,7 @@ package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
-import com.example.videoweb.base.utils.BlobUtils;
+import com.example.videoweb.base.utils.BlobUtil;
 import com.example.videoweb.domain.entity.User;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.ResultVo;
@@ -37,7 +37,7 @@ public class UserController {
         try {
             Blob blob = file.getInputStream().readAllBytes() != null ?
                     new SerialBlob(file.getInputStream().readAllBytes()) : null;
-            userService.updateById(User.builder().userId(userId).avatarBlob(BlobUtils.blobToBytes(blob)).build());
+            userService.updateById(User.builder().userId(userId).avatarBlob(BlobUtil.blobToBytes(blob)).build());
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -51,8 +51,8 @@ public class UserController {
                 .eq(User::getStatus, StatusEnum.YES.getStatus()).one();
         byte[] avatarBlob = one.getAvatarBlob();
         StringBuilder builder = new StringBuilder("data:image/png;base64,");
-        Blob blob = BlobUtils.bytesToBlob(avatarBlob);
-        String base64Image = BlobUtils.convertBlobToBase64String(blob);
+        Blob blob = BlobUtil.bytesToBlob(avatarBlob);
+        String base64Image = BlobUtil.convertBlobToBase64String(blob);
         builder.append(base64Image);
         return ResultVo.data(builder.toString());
     }
