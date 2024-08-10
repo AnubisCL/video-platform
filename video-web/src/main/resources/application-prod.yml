@@ -45,7 +45,7 @@ schedule:
   cron:
     downloadVideo: '0 0 0 * * ?'
     pushHlsVideoStreams: '0 0 0 * * ?'
-    cleanDownloadVideo: '0 0 0 * * ?'
+    updateIpv4AndIpv6: '0 0 0 * * ?'
 
 ############## mybatis-plus 配置 (文档: https://baomidou.com/introduce/) ##############
 mybatis-plus:

@@ -34,7 +34,7 @@ public class IpInfoSchedule {
     private String ipv4LanName;
     @Resource @Qualifier("ehCacheManager") private CacheManager ehCacheManager;
 
-    @Scheduled(cron = "0 0 * * * ? ")
+    @Scheduled(cron = "${schedule.cron.updateIpv4AndIpv6}")
     public void updateIpv4AndIpv6Schedule() {
         try {
             Cache<String, IpInfo> ipCache = ehCacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class);
