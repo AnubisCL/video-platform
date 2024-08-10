@@ -5,7 +5,7 @@ spring:
   application:
     name: video-web
   profiles:
-    active: prod
+    active: dev
 
 #Prometheus springboot监控配置
 management:

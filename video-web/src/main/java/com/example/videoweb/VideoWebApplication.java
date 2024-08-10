@@ -3,6 +3,7 @@ package com.example.videoweb;
 import lombok.SneakyThrows;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -11,9 +12,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.net.InetAddress;
 import java.util.Objects;
 
-@EnableTransactionManagement
 @EnableScheduling
-@SpringBootApplication
+@EnableTransactionManagement
+@SpringBootApplication(exclude = {CacheAutoConfiguration.class})
 public class VideoWebApplication {
 
     @SneakyThrows
@@ -38,3 +39,5 @@ public class VideoWebApplication {
 
 
 }
+
+

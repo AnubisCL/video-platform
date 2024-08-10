@@ -11,6 +11,7 @@ spring:
 directory:
   back-video: /home/back/video/ # 视频下载路径
   hls-video: /home/video-hls/videos/ # m3u8视频下载路径
+  ehcache-path: /home/webui/video-platform/ehcache/ # ehcache路径
 
 ffmpeg:
   log-level: warning
@@ -20,16 +21,15 @@ nginx-config:
   protocol-type:
     local:
       name: local
-      local-ipv4-url: http://127.0.0.1:8087 # 环回地址IPV4 数据中存的
+      local-ipv4-ip: 127.0.0.1 # 数据库中环回地址
     ipv4:
       name: ipv4
-      replace-ipv4: http://192.168.1.6:8087 # 局域网IPV4
+      lan-name: wlan0 # 局域网IPV4网卡
     ipv6:
       name: ipv6
-      replace-ipv6: http://[240e:473:810:2af2:2882:13ff:fef2:2589]:8087 # 电信公网IPV6
-  m3u8-suffix: http://192.168.1.6:8087/hls/
-  mp4-suffix: http://192.168.1.6:8087/back/video/
-  gif-suffix: http://192.168.1.6:8087/back/video/
+  m3u8-suffix: http://127.0.0.1:8087/hls/
+  mp4-suffix: http://127.0.0.1:8087/back/video/
+  gif-suffix: http://127.0.0.1:8087/back/video/
 
 ############## thread-pool 配置 ##############
 thread-pool:
