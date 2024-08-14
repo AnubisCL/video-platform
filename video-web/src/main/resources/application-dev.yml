@@ -61,7 +61,7 @@ mybatis-plus:
   global-config:
     banner: true
     db-config:
-      # 雪花主键生成策略
+      # 表前缀
       table-prefix: v_
 
 ############## springdoc 配置 (文档: https://openapi.apifox.cn/) ##############
