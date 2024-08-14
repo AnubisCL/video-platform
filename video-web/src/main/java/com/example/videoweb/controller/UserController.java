@@ -3,6 +3,7 @@ package com.example.videoweb.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import com.example.videoweb.base.utils.BlobUtil;
+import com.example.videoweb.domain.dto.UserDto;
 import com.example.videoweb.domain.entity.User;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.ResultVo;
@@ -56,5 +57,23 @@ public class UserController {
         builder.append(base64Image);
         return ResultVo.data(builder.toString());
     }
+
+    @PostMapping("updateUserInfo")
+    public ResultVo updateUserInfo(@RequestBody UserDto userDto) {
+        Long userId = StpUtil.getLoginIdAsLong();
+        User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
+        if (one.getPasswordHash().equals(userDto.getPasswordHash())) {
+            userService.updateById(User.builder()
+                    .userId(userId)
+                    .username(userDto.getUsername())
+                    .passwordHash(userDto.getPasswordHash())
+                    .email(userDto.getEmail())
+                    .build());
+            return ResultVo.ok();
+        } else {
+            return ResultVo.error("密码错误");
+        }
+    }
+
 
 }
