@@ -6,6 +6,7 @@ import com.example.videoweb.domain.enums.TaskStatusEnum;
 import com.example.videoweb.service.ITaskService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -24,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 public class TaskSchedule {
 
-    @Resource private ThreadPoolTaskExecutor videoExecutor;
+    @Resource @Qualifier("videoExecutor") private ThreadPoolTaskExecutor videoExecutor;
     @Resource private ITaskService taskService;
 
     @Async
@@ -71,14 +72,13 @@ public class TaskSchedule {
                     .orderByDesc(Task::getUpdateDate)
                     .list();
 
-            List<CompletableFuture<Boolean>> futures = taskList.stream()
-                    .map(task -> CompletableFuture.supplyAsync(() -> {
+            List<CompletableFuture<Void>> futures = taskList.stream()
+                    .map(task -> CompletableFuture.runAsync(() -> {
                         Task updateTask = new Task();
                         updateTask.setTaskId(task.getTaskId());
                         updateTask.setTaskStatus(TaskStatusEnum.PUSHING.getCode());
                         taskService.updateById(updateTask);
-
-                        return taskService.pushHlsVideoStreams(task);
+                        taskService.pushHlsVideoStreams(task);
                     }, videoExecutor))
                     .toList();
 
