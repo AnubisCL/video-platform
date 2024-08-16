@@ -6,6 +6,7 @@ import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.service.IEncryptService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -22,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @ControllerAdvice
 public class ResponseBodyEncryptAdvice implements ResponseBodyAdvice<ResultVo> {
 
-    @Resource private IEncryptService encryptService;
+    @Resource @Qualifier("smEncryptService") private IEncryptService encryptService;
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {

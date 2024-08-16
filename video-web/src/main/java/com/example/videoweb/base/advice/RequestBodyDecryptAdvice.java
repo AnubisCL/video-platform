@@ -8,6 +8,7 @@ import com.example.videoweb.service.IEncryptService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -32,12 +33,12 @@ public class RequestBodyDecryptAdvice implements RequestBodyAdvice {
      */
     private static final String ENCODING = "UTF-8";
 
-    @Resource private IEncryptService encryptService;
+    @Resource @Qualifier("smEncryptService") private IEncryptService encryptService;
 
     @Override
     public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
         // 判断方法或类上使用了ApiDecrypt注解
-        return methodParameter.hasMethodAnnotation(ApiDecrypt.class) ||methodParameter.getContainingClass().isAnnotationPresent(ApiDecrypt.class);
+        return methodParameter.hasMethodAnnotation(ApiDecrypt.class) || methodParameter.getContainingClass().isAnnotationPresent(ApiDecrypt.class);
     }
 
     @Override

@@ -4,7 +4,8 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import com.example.videoweb.base.annotation.ApiDecrypt;
-import com.example.videoweb.base.annotation.ApiEncrypt;
+import com.example.videoweb.base.config.CacheConfig;
+import com.example.videoweb.domain.cache.RSAInfo;
 import com.example.videoweb.domain.dto.UserDto;
 import com.example.videoweb.domain.entity.Menu;
 import com.example.videoweb.domain.entity.Role;
@@ -18,12 +19,18 @@ import com.example.videoweb.domain.vo.UserVo;
 import com.example.videoweb.service.IMenuService;
 import com.example.videoweb.service.IRoleService;
 import com.example.videoweb.service.IUserService;
+import com.example.videoweb.utils.RSAUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -41,6 +48,13 @@ public class AuthenticationController {
     @Resource private IUserService userService;
     @Resource private IRoleService roleService;
     @Resource private IMenuService menuService;
+    @Resource @Qualifier("ehCacheManager") private CacheManager ehCacheManager;
+    private static Cache<Long, RSAInfo> rsaInfoCache;
+
+    @PostConstruct
+    public void init() {
+        rsaInfoCache = ehCacheManager.getCache(CacheConfig.RSA_CACHE_NAME, Long.class, RSAInfo.class);
+    }
 
     /**
      * 注册
@@ -65,6 +79,7 @@ public class AuthenticationController {
             }
             User one = userService.lambdaQuery().eq(User::getEmail, userDto.getEmail()).one();
             StpUtil.login(one.getUserId());
+            setUserRSAInfoCache(one.getUserId());
             return ResultVo.data(StpUtil.getTokenValue());
         }
         return ResultVo.error("非法注册");
@@ -91,6 +106,7 @@ public class AuthenticationController {
                 if (optionalUser.isPresent()) {
                     User user = optionalUser.get();
                     StpUtil.login(user.getUserId());
+                    setUserRSAInfoCache(user.getUserId());
                     return ResultVo.data(StpUtil.getTokenValue());
                 } else {
                     return ResultVo.error("用户名或密码错误");
@@ -116,6 +132,8 @@ public class AuthenticationController {
      */
     @GetMapping("signOut")
     public ResultVo signOut() {
+        Long userId = StpUtil.getLoginIdAsLong();
+        rsaInfoCache.remove(userId);
         StpUtil.logout();
         return ResultVo.data("登出成功");
     }
@@ -138,6 +156,9 @@ public class AuthenticationController {
             }),
             CompletableFuture.runAsync(() -> {
                 userVo.setPermissions(roleService.getRolePermissionsByRoleId(roleId).keySet());
+            }),
+            CompletableFuture.runAsync(() -> {
+                userVo.setPublicKey(rsaInfoCache.get(userId).getPublicKey());
             })
         ).join();
         return ResultVo.data(userVo);
@@ -169,5 +190,9 @@ public class AuthenticationController {
     }
 
 
-
+    public void setUserRSAInfoCache(Long userId) {
+        Map<String, Object> genKeyPair = RSAUtil.genKeyPair();
+        rsaInfoCache.put(userId, RSAInfo.builder()
+                .publicKey(RSAUtil.getPublicKey(genKeyPair)).privateKey(RSAUtil.getPrivateKey(genKeyPair)).build());
+    }
 }

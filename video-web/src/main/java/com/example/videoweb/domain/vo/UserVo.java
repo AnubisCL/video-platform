@@ -29,6 +29,9 @@ public class UserVo {
     @Schema(description = "用户邮箱")
     private String email;
 
+    @Schema(description = "公钥")
+    private String publicKey;
+
     @Schema(description = "0:正常,1:锁定")
     private Integer status;
 
