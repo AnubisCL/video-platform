@@ -1,4 +1,4 @@
-package com.example.videoweb.base.config;
+package com.example.videoweb.base.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

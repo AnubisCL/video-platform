@@ -1,4 +1,4 @@
-package com.example.videoweb.base.utils;
+package com.example.videoweb.utils;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,6 +1,8 @@
 package com.example.videoweb.base.config;
 
+import com.example.videoweb.base.properties.BaseDirectoryProperties;
 import com.example.videoweb.domain.cache.IpInfo;
+import jakarta.annotation.Resource;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -23,8 +25,7 @@ public class CacheConfig {
 
     public static final String IP_CACHE_NAME = "ipCache";
 
-    @Value("${directory.ehcache-path}")
-    private String ehcachePath;
+    @Resource private BaseDirectoryProperties baseDirectoryProperties;
 
     @Bean
     public CacheManager ehCacheManager() {
@@ -41,7 +42,7 @@ public class CacheConfig {
 
         //构建
         return CacheManagerBuilder.newCacheManagerBuilder()
-                .with(CacheManagerBuilder.persistence(ehcachePath))//磁盘储存路径
+                .with(CacheManagerBuilder.persistence(baseDirectoryProperties.getEhcachePath()))//磁盘储存路径
                 .withCache(IP_CACHE_NAME, ipCacheConfiguration)
                 .build(true);
     }

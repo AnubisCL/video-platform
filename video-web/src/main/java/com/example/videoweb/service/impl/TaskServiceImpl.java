@@ -3,7 +3,8 @@ package com.example.videoweb.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.videoweb.base.utils.ProcessUtil;
+import com.example.videoweb.base.properties.BaseDirectoryProperties;
+import com.example.videoweb.utils.ProcessUtil;
 import com.example.videoweb.domain.entity.Task;
 import com.example.videoweb.domain.entity.Video;
 import com.example.videoweb.domain.enums.TaskStatusEnum;
@@ -43,8 +44,7 @@ import java.util.Map;
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements ITaskService {
 
     private static final String INDEX_M3U8 = "index.m3u8";
-    @Value("${directory.back-video}") private String BASE_DIR;
-    @Value("${directory.hls-video}") private String HLS_DIR;
+    @Resource private BaseDirectoryProperties baseDirectoryProperties;
     @Value("${nginx-config.m3u8-suffix}") private String m3u8Suffix;
     @Value("${nginx-config.mp4-suffix}") private String mp4Suffix;
     @Value("${nginx-config.gif-suffix}") private String gifSuffix;
@@ -60,7 +60,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     public void downloadVideo(Task task) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         String dateStr = LocalDate.now().format(formatter);
-        String path = createDateDirectory(BASE_DIR, dateStr);
+        String path = createDateDirectory(baseDirectoryProperties.getBackVideo(), dateStr);
         String videoOutputPath = path + File.separator + task.getTaskId() + ".mp4";
         String gifOutputPath = path + File.separator + task.getTaskId() + ".gif";
 
@@ -121,8 +121,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         String totalSeconds = downloadRes.getString("total_seconds");
         String frame = downloadRes.getString("frame");
         video.setDescription("时长: " + formatSecondsToMinutesAndSeconds(Double.parseDouble(totalSeconds)) + "，帧数: " + frame);
-        String replaceVideoPath = outputVideoPath.replace(BASE_DIR, mp4Suffix);
-        String replaceGifPath = outputGifPath.replace(BASE_DIR, gifSuffix);
+        String replaceVideoPath = outputVideoPath.replace(baseDirectoryProperties.getBackVideo(), mp4Suffix);
+        String replaceGifPath = outputGifPath.replace(baseDirectoryProperties.getBackVideo(), gifSuffix);
         video.setHlsUrl(replaceVideoPath);
         video.setImageUrl(replaceGifPath);
         videoService.save(video);
@@ -146,7 +146,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         String totalSeconds = downloadRes.getString("total_seconds");
         String frame = downloadRes.getString("frame");
         video.setDescription("时长: " + formatSecondsToMinutesAndSeconds(Double.parseDouble(totalSeconds)) + "，帧数: " + frame);
-        String replaceGifPath = outputGifPath.replace(BASE_DIR, gifSuffix);
+        String replaceGifPath = outputGifPath.replace(baseDirectoryProperties.getBackVideo(), gifSuffix);
         video.setImageUrl(replaceGifPath);
         video.setHlsUrl("");
         String loadDirectory = null;
@@ -157,7 +157,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         try {
             videoService.save(video);
 
-            loadDirectory = createDateDirectory(HLS_DIR, String.valueOf(video.getVideoId()));
+            loadDirectory = createDateDirectory(baseDirectoryProperties.getHlsVideo(), String.valueOf(video.getVideoId()));
             String replaceVideoPath = m3u8Suffix + video.getVideoId() + File.separator + INDEX_M3U8;
             Video videoUpdate = new Video();
             videoUpdate.setVideoId(video.getVideoId());

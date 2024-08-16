@@ -2,7 +2,8 @@ package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
-import com.example.videoweb.base.utils.BlobUtil;
+import com.example.videoweb.base.annotation.ApiDecrypt;
+import com.example.videoweb.utils.BlobUtil;
 import com.example.videoweb.domain.dto.UserDto;
 import com.example.videoweb.domain.entity.User;
 import com.example.videoweb.domain.enums.StatusEnum;
@@ -58,6 +59,7 @@ public class UserController {
         return ResultVo.data(builder.toString());
     }
 
+    @ApiDecrypt
     @PostMapping("updateUserInfo")
     public ResultVo updateUserInfo(@RequestBody UserDto userDto) {
         Long userId = StpUtil.getLoginIdAsLong();

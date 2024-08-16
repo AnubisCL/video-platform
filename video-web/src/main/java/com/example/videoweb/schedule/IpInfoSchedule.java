@@ -2,8 +2,8 @@ package com.example.videoweb.schedule;
 
 import com.alibaba.fastjson.JSON;
 import com.example.videoweb.base.config.CacheConfig;
-import com.example.videoweb.base.utils.IpUtil;
-import com.example.videoweb.base.utils.ProcessUtil;
+import com.example.videoweb.utils.IpUtil;
+import com.example.videoweb.utils.ProcessUtil;
 import com.example.videoweb.domain.cache.IpInfo;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;

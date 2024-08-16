@@ -1,4 +1,4 @@
-package com.example.videoweb.base.utils;
+package com.example.videoweb.utils;
 
 import cn.dev33.satoken.SaManager;
 import cn.dev33.satoken.fun.SaFunction;

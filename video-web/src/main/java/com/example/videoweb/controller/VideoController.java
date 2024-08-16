@@ -65,14 +65,6 @@ public class VideoController {
     @Value("${nginx-config.protocol-type.ipv4.name}") private String ipv4;
     @Value("${nginx-config.protocol-type.ipv6.name}") private String ipv6;
 
-    //todo：
-    // 1.自动获取内网Ipv4地址，
-    //  1.1. proot-distro ubuntu 可以获取到 ifconfig - wlan0 - inet
-    // 2.自动获取内网Ipv6地址
-    //  2.1. proot-distro ubuntu 获取不到 使用 curl 请求外部获取Ipv6
-    // 缓存到本地，每隔10分钟更新一次缓存，
-    // 3.Caffeine/Ehcache(支持磁盘持久化) 缓存到本地，每隔10分钟更新一次缓存
-
     @PostMapping("getVideoList")
     public ResultVo getVideoList(@Valid @RequestBody VideoDto videoDto, HttpServletRequest request) {
         Long userId = StpUtil.getLoginIdAsLong();

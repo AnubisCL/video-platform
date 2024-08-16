@@ -1,4 +1,4 @@
-package com.example.videoweb.base.utils;
+package com.example.videoweb.utils;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.ByteArrayOutputStream;

@@ -3,6 +3,8 @@ package com.example.videoweb.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
+import com.example.videoweb.base.annotation.ApiDecrypt;
+import com.example.videoweb.base.annotation.ApiEncrypt;
 import com.example.videoweb.domain.dto.UserDto;
 import com.example.videoweb.domain.entity.Menu;
 import com.example.videoweb.domain.entity.Role;
@@ -45,6 +47,7 @@ public class AuthenticationController {
      * @return
      */
     @SaIgnore
+    @ApiDecrypt
     @PostMapping("signIn")
     public ResultVo signIn(@RequestBody @Valid UserDto userDto) {
         String signType = userDto.getSignType();

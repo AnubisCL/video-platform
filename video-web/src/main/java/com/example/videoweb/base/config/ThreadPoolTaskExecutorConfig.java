@@ -1,6 +1,7 @@
 package com.example.videoweb.base.config;
 
 import com.example.videoweb.base.factory.MyThreadFactory;
+import com.example.videoweb.base.properties.ThreadPoolConfigProperties;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 public class ThreadPoolTaskExecutorConfig {
 
-    @Resource
-    private ThreadPoolConfigProperties config;
+    @Resource private ThreadPoolConfigProperties config;
 
     @Bean
     public ThreadPoolTaskExecutor videoExecutor() {
