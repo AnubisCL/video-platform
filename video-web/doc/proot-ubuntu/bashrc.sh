@@ -118,6 +118,14 @@ if ! echo "$mysql_status" | grep -q "Server version"; then
     service mysql restart
 fi
 
+# 检查jenkins服务状态
+#service jenkins status
+jenkins_status=$(service jenkins status)
+if [[ $jenkins_status != *"jenkins is running"* ]]; then
+    echo "Jenkins is not running. Restarting..."
+    service jenkins restart
+fi
+
 # 定义JAR文件的名称
 JAR_NAME="video-web.jar"
 # 检查输出中是否包含JAR_NAME

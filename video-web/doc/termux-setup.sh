@@ -59,3 +59,8 @@ else
   # 切换目录再执行shell，避免日志输出到当前目录
   (cd ~/../usr/var/lib/proot-distro/installed-rootfs/ubuntu/home/prometheus/node_exporter-1.8.2.linux-arm64 && su -c "./node_exporter --web.listen-address=:9100" & ) &> /dev/null &
 fi
+
+# jenkins
+curl -L0 https://repo.huaweicloud.com/jenkins/debian/jenkins_2.406_all.deb --output jenkins_2.406_all.deb
+# 配置文件
+/etc/default/jenkins
