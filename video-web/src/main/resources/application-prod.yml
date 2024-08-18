@@ -8,7 +8,7 @@ spring:
       maximum-pool-size: 10
       connection-timeout: 30000
 
-directory:
+base-directory:
   back-video: /home/back/video/ # 视频下载路径
   hls-video: /home/video-hls/videos/ # m3u8视频下载路径
   ehcache-path: /home/webui/video-platform/ehcache/ # ehcache路径
