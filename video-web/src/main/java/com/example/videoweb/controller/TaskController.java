@@ -109,6 +109,7 @@ public class TaskController {
         if (info.getIsIpv6()) {
             result.put("前端地址", "http://[" + info.getIpv6() + "]:3000");
             result.put("后端API-DOC 地址", "http://[" + info.getIpv6() + "]:7077/swagger-ui.html");
+            result.put("Jenkins 地址", "http://[" + info.getIpv6() + "]:8084");
             result.put("Nginx 地址", "http://[" + info.getIpv6() + "]:8080");
             result.put("Grafana 地址", "http://[" + info.getIpv6() + "]:9091/login");
             result.put("Prometheus 地址", "http://[" + info.getIpv6() + "]:9090");

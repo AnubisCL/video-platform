@@ -142,8 +142,7 @@ if [ -n "$GRAFANA_PID" ]; then
 else
     service grafana-server restart
 fi
-
-
+# Prometheus相关
 PROMETHEUS_GREP=$(ps -ef | grep -v grep | grep prometheu)
 PROMETHEUS="prometheus-2.54.0-rc.0.linux-arm64"
 NODE_EXPORTER="node_exporter-1.8.2.linux-arm64"
