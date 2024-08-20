@@ -64,3 +64,10 @@ fi
 curl -L0 https://repo.huaweicloud.com/jenkins/debian/jenkins_2.406_all.deb --output jenkins_2.406_all.deb
 # 配置文件
 /etc/default/jenkins
+
+# supervisor 是一个用于 Linux/Unix 系统的进程管理工具，
+# 它可以让你轻松地将命令行程序作为守护进程运行，并且在它们崩溃时自动重启这些程序。
+supervisorctl reread
+supervisorctl update
+supervisorctl status
+supervisorctl -c /etc/supervisor/supervisord.conf

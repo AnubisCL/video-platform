@@ -103,6 +103,13 @@ fi
 #fi
 
 #================================ my shell ======================================
+# 使用 supervisor 管理自启动的服务
+supervisor_status=$(service supervisor status)
+if [[ $supervisor_status != *"supervisord is running"* ]]; then
+    echo "Supervisor is not running. Restarting..."
+    service supervisor start
+fi
+#================================ my shell ======================================
 
 # 检查nginx服务状态
 nginx_status=$(service nginx status)
@@ -112,11 +119,11 @@ if [[ $nginx_status != *"nginx is running"* ]]; then
 fi
 
 # 检查mysql服务状态
-mysql_status=$(service mysql status)
-if ! echo "$mysql_status" | grep -q "Server version"; then
-    echo "MySQL is not running. Restarting..."
-    service mysql restart
-fi
+#mysql_status=$(service mysql status)
+#if ! echo "$mysql_status" | grep -q "Server version"; then
+#    echo "MySQL is not running. Restarting..."
+#    service mysql restart
+#fi
 
 # 检查jenkins服务状态
 #service jenkins status
