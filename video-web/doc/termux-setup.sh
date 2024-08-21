@@ -14,8 +14,6 @@ vim $PREFIX/etc/motd
   | |/ _ \ '__| '_ ` _ \| | | \ \/ /
   | |  __/ |  | | | | | | |_| |>  <
   |_|\___|_|  |_| |_| |_|\___</_/\_\
-  
-  Put wings on your dreams!
 
 # root
 pkg install tsu
@@ -66,7 +64,6 @@ curl -L0 https://repo.huaweicloud.com/jenkins/debian/jenkins_2.406_all.deb --out
 /etc/default/jenkins
 # 工作目录
 ~/.jenkins/workspace/
-# todo: del dir => /var/lib/jenkins
 
 # supervisor 是一个用于 Linux/Unix 系统的进程管理工具，
 # 它可以让你轻松地将命令行程序作为守护进程运行，并且在它们崩溃时自动重启这些程序。
