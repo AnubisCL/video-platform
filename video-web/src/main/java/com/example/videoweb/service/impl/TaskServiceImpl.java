@@ -164,11 +164,12 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
             videoUpdate.setHlsUrl(replaceVideoPath);
             videoService.updateById(videoUpdate);
 
+            //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 -threads 4 output.m3u8
             //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 output.m3u8
             //ffmpeg -i input.mp4 -hls_time 10 -hls_list_size 0 -hls_segment_filename output_%03d.ts output.m3u8
             boolean executeCommand = ProcessUtil.executeCommand(
                     Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
-                            "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", loadDirectory + File.separator + INDEX_M3U8)
+                            "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", "-threads" , "4", loadDirectory + File.separator + INDEX_M3U8)
             ); //"-hls_wrap", "0",
 
             if (executeCommand) {
