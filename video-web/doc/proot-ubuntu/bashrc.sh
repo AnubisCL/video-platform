@@ -102,21 +102,39 @@ fi
 #    service supervisor start
 #fi
 
+#================================ my path ======================================
+# nvm配置
+export NVM_NODEJS_ORG_MIRROR=https://registry.npmmirror.com/mirrors/node/
+export NVM_IOJS_ORG_MIRROR=https://registry.npmmirror.com/mirrors/node/
+export NVM_DIR="/root/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#================================ my path ======================================
+
 #================================ my shell ======================================
 # 使用 supervisor 管理自启动的服务
 supervisor_status=$(service supervisor status)
 if [[ $supervisor_status != *"supervisord is running"* ]]; then
-    echo "Supervisor is not running. Restarting..."
+    echo "Supervisor starting."
     service supervisor start
+fi
+
+# 定义JAR文件的名称
+JAR_NAME="video-web.jar"
+# 检查输出中是否包含JAR_NAME
+if ! echo "$(jps -l)" | grep -q "$JAR_NAME"; then
+    echo "The $JAR_NAME starting."
+    # 切换目录再执行shell，避免日志输出到当前目录
+    (cd /home/webui/video-platform && ./main.sh restart) &> /dev/null &
 fi
 #================================ my shell ======================================
 
 # 检查nginx服务状态
-nginx_status=$(service nginx status)
-if [[ $nginx_status != *"nginx is running"* ]]; then
-    echo "Nginx is not running. Restarting..."
-    service nginx restart
-fi
+#nginx_status=$(service nginx status)
+#if [[ $nginx_status != *"nginx is running"* ]]; then
+#    echo "Nginx is not running. Restarting..."
+#    service nginx restart
+#fi
 
 # 检查mysql服务状态
 #mysql_status=$(service mysql status)
@@ -126,41 +144,31 @@ fi
 #fi
 
 # 检查jenkins服务状态
-#service jenkins status
-jenkins_status=$(service jenkins status)
-if [[ $jenkins_status != *"jenkins is running"* ]]; then
-    echo "Jenkins is not running. Restarting..."
-    service jenkins restart
-fi
-
-# 定义JAR文件的名称
-JAR_NAME="video-web.jar"
-# 检查输出中是否包含JAR_NAME
-if ! echo "$(jps -l)" | grep -q "$JAR_NAME"; then
-    echo "The $JAR_NAME process is not running. Starting it now..."
-    # 切换目录再执行shell，避免日志输出到当前目录
-    (cd /home/webui/video-platform && ./main.sh restart) &> /dev/null &
-fi
+#jenkins_status=$(service jenkins status)
+#if [[ $jenkins_status != *"jenkins is running"* ]]; then
+#    echo "Jenkins is not running. Restarting..."
+#    service jenkins restart
+#fi
 
 # 检查Grafana服务状态
-GRAFANA_PID=$(pgrep grafana)
-if [ -n "$GRAFANA_PID" ]; then
-    echo "Grafana is running. PID: $GRAFANA_PID"
-else
-    service grafana-server restart
-fi
+#GRAFANA_PID=$(pgrep grafana)
+#if [ -n "$GRAFANA_PID" ]; then
+#    echo "Grafana is running. PID: $GRAFANA_PID"
+#else
+#    service grafana-server restart
+#fi
 # Prometheus相关
-PROMETHEUS_GREP=$(ps -ef | grep -v grep | grep prometheu)
-PROMETHEUS="prometheus-2.54.0-rc.0.linux-arm64"
-NODE_EXPORTER="node_exporter-1.8.2.linux-arm64"
-MYSQLD_EXPORTER="mysqld_exporter-0.15.1.linux-arm64"
-NGINX_EXPORTER="nginx-prometheus-exporter-1.3.0.linux-arm64"
+#PROMETHEUS_GREP=$(ps -ef | grep -v grep | grep prometheu)
+#PROMETHEUS="prometheus-2.54.0-rc.0.linux-arm64"
+#NODE_EXPORTER="node_exporter-1.8.2.linux-arm64"
+#MYSQLD_EXPORTER="mysqld_exporter-0.15.1.linux-arm64"
+#NGINX_EXPORTER="nginx-prometheus-exporter-1.3.0.linux-arm64"
 # 检查Prometheus服务状态
-if ! echo "$PROMETHEUS_GREP" | grep -q "$PROMETHEUS"; then
-    echo "The $PROMETHEUS process is not running. Starting it now..."
-    # 切换目录再执行shell，避免日志输出到当前目录
-    (cd /home/prometheus/prometheus-2.54.0-rc.0.linux-arm64 && ./main-prometheus.sh restart) &> /dev/null &
-fi
+#if ! echo "$PROMETHEUS_GREP" | grep -q "$PROMETHEUS"; then
+#    echo "The $PROMETHEUS process is not running. Starting it now..."
+#    # 切换目录再执行shell，避免日志输出到当前目录
+#    (cd /home/prometheus/prometheus-2.54.0-rc.0.linux-arm64 && ./main-prometheus.sh restart) &> /dev/null &
+#fi
 # 检查Node Exporter服务状态
 #if ! echo "$PROMETHEUS_GREP" | grep -q "$NODE_EXPORTER"; then
 #    echo "The $NODE_EXPORTER process is not running. Starting it now..."
@@ -168,14 +176,14 @@ fi
 #    (cd /home/prometheus/node_exporter-1.8.2.linux-arm64 && ./main-nodeExporter.sh restart) &> /dev/null &
 #fi
 # 检查Mysqld Exporter服务状态
-if ! echo "$PROMETHEUS_GREP" | grep -q "$MYSQLD_EXPORTER"; then
-    echo "The $MYSQLD_EXPORTER process is not running. Starting it now..."
-    # 切换目录再执行shell，避免日志输出到当前目录
-    (cd /home/prometheus/mysqld_exporter-0.15.1.linux-arm64 && ./main-mysqldExporter.sh restart) &> /dev/null &
-fi
+#if ! echo "$PROMETHEUS_GREP" | grep -q "$MYSQLD_EXPORTER"; then
+#    echo "The $MYSQLD_EXPORTER process is not running. Starting it now..."
+#    # 切换目录再执行shell，避免日志输出到当前目录
+#    (cd /home/prometheus/mysqld_exporter-0.15.1.linux-arm64 && ./main-mysqldExporter.sh restart) &> /dev/null &
+#fi
 # 检查Nginx Exporter服务状态
-if ! echo "$PROMETHEUS_GREP" | grep -q "$NGINX_EXPORTER"; then
-    echo "The $NGINX_EXPORTER process is not running. Starting it now..."
-    # 切换目录再执行shell，避免日志输出到当前目录
-    (cd /home/prometheus/nginx-prometheus-exporter-1.3.0.linux-arm64 && ./main-nginxExporter.sh restart) &> /dev/null &
-fi
+#if ! echo "$PROMETHEUS_GREP" | grep -q "$NGINX_EXPORTER"; then
+#    echo "The $NGINX_EXPORTER process is not running. Starting it now..."
+#    # 切换目录再执行shell，避免日志输出到当前目录
+#    (cd /home/prometheus/nginx-prometheus-exporter-1.3.0.linux-arm64 && ./main-nginxExporter.sh restart) &> /dev/null &
+#fi

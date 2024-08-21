@@ -74,3 +74,6 @@ supervisorctl reread && supervisorctl update
 supervisorctl status
 # 交互
 supervisorctl -c /etc/supervisor/supervisord.conf
+
+# service
+service --status-all
