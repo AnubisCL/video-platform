@@ -39,11 +39,11 @@ public class TaskSchedule {
                 .last("limit 1")
                 .list();
         taskList.forEach(task -> {
+            Task updateTask = new Task();
+            updateTask.setTaskId(task.getTaskId());
+            updateTask.setTaskStatus(TaskStatusEnum.DOWNLOADING.getCode());
+            taskService.updateById(updateTask);
             videoExecutor.execute(() -> {
-                Task updateTask = new Task();
-                updateTask.setTaskId(task.getTaskId());
-                updateTask.setTaskStatus(TaskStatusEnum.DOWNLOADING.getCode());
-                taskService.updateById(updateTask);
                 taskService.downloadVideo(task);
             });
         });
