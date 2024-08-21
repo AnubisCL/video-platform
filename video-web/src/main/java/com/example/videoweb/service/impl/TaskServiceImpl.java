@@ -164,14 +164,28 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
             videoUpdate.setHlsUrl(replaceVideoPath);
             videoService.updateById(videoUpdate);
 
-            //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 -threads 4 output.m3u8
-            //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 output.m3u8
-            //ffmpeg -i input.mp4 -hls_time 10 -hls_list_size 0 -hls_segment_filename output_%03d.ts output.m3u8
-            boolean executeCommand = ProcessUtil.executeCommand(
-                    Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
-                            "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", "-threads" , "4", loadDirectory + File.separator + INDEX_M3U8)
-            ); //"-hls_wrap", "0",
+            String codecName = ProcessUtil.executeCommandWithResult(
+                    Arrays.asList("ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=codec_name",
+                            "-of", "default=noprint_wrappers=1:nokey=1", outputVideoPath)
+            );
 
+            boolean executeCommand = false;
+
+            if (codecName.equals("h264")) {
+                //ffmpeg -i input.mp4 -c copy -map 0 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 -threads 4 output.m3u8
+                executeCommand = ProcessUtil.executeCommand(
+                        Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c", "copy", "-map", "0", "-f", "hls",
+                                "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", "-threads" , "4", loadDirectory + File.separator + INDEX_M3U8)
+                );
+            } else {
+                //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 -threads 4 output.m3u8
+                //ffmpeg -i input.mp4 -c:v libx264 -c:a aac -strict -2 -f hls -hls_time 20 -hls_list_size 0 -hls_wrap 0 output.m3u8
+                //ffmpeg -i input.mp4 -hls_time 10 -hls_list_size 0 -hls_segment_filename output_%03d.ts output.m3u8
+                executeCommand = ProcessUtil.executeCommand(
+                        Arrays.asList("ffmpeg", "-i", outputVideoPath, "-c:v", "libx264", "-c:a", "aac", "-strict",
+                                "-2", "-f", "hls", "-hls_time", ffmpegHlsTime, "-hls_list_size", "0", "-threads" , "4", loadDirectory + File.separator + INDEX_M3U8)
+                ); //"-hls_wrap", "0",
+            }
             if (executeCommand) {
                 updateTask.setTaskStatus(TaskStatusEnum.PUSH_COMPLETE.getCode());
             } else {
