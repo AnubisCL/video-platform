@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_URL = 'https://github.com/AnubisCL/video-platform.git' // GitHub 仓库 URL
+        GIT_URL = 'https://gitee.com/anubiscl/video-platform.git' // GitHub 仓库 URL https://github.com/AnubisCL/video-platform.git
         BRANCH = 'main' // 替换为你想要构建的分支
         JAR_PATH = 'video-web/target/video-web.jar' // 替换为你的 Spring Boot 应用程序 JAR 文件名
         DEPLOY_DIR = '/home/webui/video-platform' // 替换为你要部署 JAR 包的目标目录
