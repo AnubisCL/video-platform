@@ -35,7 +35,7 @@
         <revision>1.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <springboot.version>3.3.2</springboot.version>
+        <springboot.version>3.1.6</springboot.version>
         <mysql.version>8.0.28</mysql.version>
         <hikariCP.version>5.0.1</hikariCP.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
@@ -58,6 +58,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.springframework.statemachine</groupId>
+                <artifactId>spring-statemachine-starter</artifactId>
+                <version>4.0.0</version>
+            </dependency>
+
+<!--            <dependency>-->
+<!--                <groupId>org.springframework.statemachine</groupId>-->
+<!--                <artifactId>spring-statemachine-kryo</artifactId>-->
+<!--                <version>3.1.0</version>-->
+<!--            </dependency>-->
 
             <!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus -->
             <dependency>
