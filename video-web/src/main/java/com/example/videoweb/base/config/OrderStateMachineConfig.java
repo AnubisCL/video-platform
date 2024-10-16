@@ -34,9 +34,6 @@ import java.util.EnumSet;
 public class OrderStateMachineConfig extends StateMachineConfigurerAdapter<OrderState, OrderEvent> {
 
     @Resource
-    private OrderStateListenerImpl orderStateListener;
-
-    @Resource
     private OrderMapper orderMapper;
 
     /**
@@ -77,12 +74,12 @@ public class OrderStateMachineConfig extends StateMachineConfigurerAdapter<Order
         config.withConfiguration().listener(new StateMachineListenerAdapter<OrderState, OrderEvent>() {
             @Override//1、第一次状态机状态改变监听， 3、第一次状态机状态改变监听
             public void stateChanged(State<OrderState, OrderEvent> from, State<OrderState, OrderEvent> to) {
-                log.info("State changed from {} to {}", from, to);
+                log.info("状态机 from： {} to： {}", from, to);
             }
 
-            @Override
+            @Override//4、状态机发送消息失败失败时
             public void eventNotAccepted(Message<OrderEvent> event) {
-                log.warn("Event {} not accepted", event.getHeaders().get("payload"));
+                log.warn("事件 {} 不被允许", event.getHeaders().get("payload"));
             }
         });
     }

@@ -34,7 +34,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private StateMachinePersister<OrderState, OrderEvent, Order> stateMachinePersister;
     @Override
     public Order create() {
-        // fixme
+        // fixme 订单实际的信息待完善
         Order order = new Order();
         order.setUserId(1L);
         order.setTotalPrice(77L);
@@ -47,9 +47,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order confirm(Long id) {
         Order order = baseMapper.selectById(id);
         Message message = MessageBuilder.withPayload(OrderEvent.CONFIRM_ORDER).setHeader(Constant.orderHeader, order).build();
-        log.info("线程名称：" + Thread.currentThread().getName() + " 尝试确认，订单号：" + id);
+        log.info("尝试确认，订单号：" + id);
         if (!sendEvent(message, order)) {
-            log.error("线程名称：" + Thread.currentThread().getName() + " 尝试确认失败, 状态异常，订单号：" + id);
+            log.error("尝试确认失败, 状态异常，订单号：" + id);
         }
         return order;
     }
@@ -58,9 +58,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order done(Long id) {
         Order order = baseMapper.selectById(id);
         Message message = MessageBuilder.withPayload(OrderEvent.DONE_ORDER).setHeader(Constant.orderHeader, order).build();
-        log.info("线程名称：" + Thread.currentThread().getName() + " 尝试完成，订单号：" + id);
+        log.info("尝试完成，订单号：" + id);
         if (!sendEvent(message, order)) {
-            log.error("线程名称：" + Thread.currentThread().getName() + " 尝试完成失败, 状态异常，订单号：" + id);
+            log.error("尝试完成失败, 状态异常，订单号：" + id);
         }
         return order;
     }
@@ -68,18 +68,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public Order cancel(Long id) {
         Order order = baseMapper.selectById(id);
-        log.info("线程名称：" + Thread.currentThread().getName() + " 尝试取消，订单号：" + id);
+        log.info("尝试取消，订单号：" + id);
         if (!sendEvent(MessageBuilder.withPayload(OrderEvent.CANCEL_ORDER).setHeader(Constant.orderHeader, order).build(), order)) {
-            log.error("线程名称：" + Thread.currentThread().getName() + " 尝试取消失败，状态异常，订单号：" + id);
+            log.error("尝试取消失败，状态异常，订单号：" + id);
         }
         return order;
     }
     @Override
     public Order back(Long id) {
         Order order = baseMapper.selectById(id);
-        log.info("线程名称：" + Thread.currentThread().getName() + " 尝试回退，订单号：" + id);
+        log.info("尝试回退，订单号：" + id);
         if (!sendEvent(MessageBuilder.withPayload(OrderEvent.BACK_ORDER).setHeader(Constant.orderHeader, order).build(), order)) {
-            log.error("线程名称：" + Thread.currentThread().getName() + " 尝试回退失败，状态异常，订单号：" + id);
+            log.error("尝试回退失败，状态异常，订单号：" + id);
         }
         return order;
     }
@@ -101,13 +101,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         boolean result = false;
         try {
             orderStateMachine.start();//0、开启状态机
+            log.info("开启状态机，当前状态: {}", orderStateMachine.getState().getId());
+
             //尝试恢复状态机状态（这里没有恢复成功，导致下面状态机状态还是WAITING_CONFIRM）
             stateMachinePersister.restore(orderStateMachine, order);
+            log.info("恢复状态机状态，当前状态: {}", orderStateMachine.getState().getId());
+
             //添加延迟用于线程安全测试
             //Thread.sleep(1000);
-            log.info("Current state before sending event: {}", orderStateMachine.getState().getId());
-
             result = orderStateMachine.sendEvent(message);
+            log.info("发送消息后，当前状态: {}", orderStateMachine.getState().getId());
             if(!result){
                 return false;
             }
