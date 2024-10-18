@@ -16,7 +16,7 @@ import lombok.Setter;
  * </p>
  *
  * @author anubis
- * @since 2024-10-16
+ * @since 2024-10-19
  */
 @Getter
 @Setter
@@ -35,10 +35,22 @@ public class Product {
     private Long productDetailId;
 
     @Schema(description = "商品名称")
-    private String name;
+    private String title;
+
+    @Schema(description = "商品描述")
+    private String description;
+
+    @Schema(description = "商品图片")
+    private String thumb;
+
+    @Schema(description = "商品评分")
+    private Long rate;
 
     @Schema(description = "商品价格")
     private Long price;
+
+    @Schema(description = "商品原价格")
+    private Long originPrice;
 
     @Schema(description = "库存数量")
     private Long stock;

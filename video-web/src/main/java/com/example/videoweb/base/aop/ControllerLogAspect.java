@@ -13,6 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -24,6 +25,13 @@ import java.util.Map;
 @Component
 public class ControllerLogAspect {
 
+    private static HashSet<String> filterPrintSet;
+    static {
+        filterPrintSet = new HashSet<>();
+        filterPrintSet.add("/get-avatar");
+        filterPrintSet.add("/isLogin");
+    }
+
     @Pointcut("execution(* com.example.videoweb.controller..*(..))")
     public void requestServer() {
     }
@@ -34,17 +42,25 @@ public class ControllerLogAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes)
                 RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
-        log.info("=======================Request Start========================");
-        log.info("Remote IP      : {}", request.getRemoteAddr());
-        log.info("URL            : {}", request.getRequestURL().toString());
-        log.info("HTTP Method    : {}", request.getMethod());
-        log.info("Request Params : {}", getRequestParams(proceedingJoinPoint));
-        log.info("=======================Request End==========================");
-        Object result = proceedingJoinPoint.proceed();
-        log.info("=======================Response Start=======================");
-        log.info("Result         : {}", result);
-        log.info("Time Cost      : {} ms", System.currentTimeMillis() - start);
-        log.info("=======================Response End=========================");
+        String url = request.getRequestURL().toString();
+        String[] splitUrl = url.split("/");
+        boolean isPrint = !filterPrintSet.contains("/"+splitUrl[splitUrl.length - 1]);
+        Object result = null;
+        if (isPrint) {
+            log.info("=======================Request Start========================");
+            log.info("Remote IP      : {}", request.getRemoteAddr());
+            log.info("URL            : {}", url);
+            log.info("HTTP Method    : {}", request.getMethod());
+            log.info("Request Params : {}", getRequestParams(proceedingJoinPoint));
+            log.info("=======================Request End==========================");
+            result = proceedingJoinPoint.proceed();
+            log.info("=======================Response Start=======================");
+            log.info("Result         : {}", result);
+            log.info("Time Cost      : {} ms", System.currentTimeMillis() - start);
+            log.info("=======================Response End=========================");
+        } else {
+            result = proceedingJoinPoint.proceed();
+        }
         return result;
     }
 

@@ -1,7 +1,7 @@
 package com.example.videoweb.service;
 
-import com.example.videoweb.domain.entity.Product;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.videoweb.domain.entity.Product;
 
 /**
  * <p>
