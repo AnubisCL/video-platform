@@ -171,20 +171,19 @@ public class AuthenticationController {
         return ResultVo.data(roleService.getRolePermissionsByRoleId(user.getRoleId()).keySet());
     }
 
-    @GetMapping("getMenuList")
-    public ResultVo getMenuList() {
+    @GetMapping("getMenuList/{type}")
+    public ResultVo getMenuList(@PathVariable(value = "type") String type) {
         Long userId = StpUtil.getLoginIdAsLong();
         User one = userService.lambdaQuery().eq(User::getUserId, userId).one();
         Long roleId = one.getRoleId();
         List<Menu> menuByRoleId = menuService.getMenuByRoleId(roleId);
         List<MenuVo> menuVoList = menuByRoleId.stream()
+                .filter(f -> f.getMenuType().equals(type))
                 .map(v -> MenuVo.builder()
-                        .path(v.getMenuPath())
-                        .name(v.getMenuName())
-                        .metaTitle(v.getMetaTitle())
-                        .metaRequireAuth(v.getMetaRequireAuth())
-                        .metaKeepAlive(v.getMetaKeepAlive())
-                        .component(v.getMenuComponent()).build()
+                        .menuPath(v.getMenuPath())
+                        .menuIcon(v.getMenuIcon())
+                        .menuTitle(v.getMenuTitle())
+                        .build()
                 ).collect(Collectors.toList());
         return ResultVo.data(menuVoList);
     }

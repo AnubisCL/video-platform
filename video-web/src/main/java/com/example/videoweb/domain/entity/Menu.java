@@ -34,20 +34,14 @@ public class Menu {
     @Schema(description = "菜单path")
     private String menuPath;
 
-    @Schema(description = "菜单名称")
-    private String menuName;
+    @Schema(description = "菜单Icon")
+    private String menuIcon;
 
-    @Schema(description = "meta.title")
-    private String metaTitle;
+    @Schema(description = "菜单标题（i18）")
+    private String menuTitle;
 
-    @Schema(description = "meta.keepAlive")
-    private String metaKeepAlive;
-
-    @Schema(description = "meta.requireAuth")
-    private String metaRequireAuth;
-
-    @Schema(description = "component-import")
-    private String menuComponent;
+    @Schema(description = "菜单类型")
+    private String menuType;
 
     @Schema(description = "0:正常,1:失效")
     private Integer status;
