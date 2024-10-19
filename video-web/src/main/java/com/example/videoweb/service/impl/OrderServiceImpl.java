@@ -4,18 +4,24 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.videoweb.domain.Constant;
 import com.example.videoweb.domain.entity.Order;
+import com.example.videoweb.domain.entity.OrderItem;
+import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.enums.OrderEvent;
 import com.example.videoweb.domain.enums.OrderState;
+import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.mapper.OrderMapper;
+import com.example.videoweb.service.IOrderItemService;
 import com.example.videoweb.service.IOrderService;
+import com.example.videoweb.service.IProductService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.persist.StateMachinePersister;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,29 +33,42 @@ import java.util.Map;
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
 
-    @Autowired
-    private StateMachine<OrderState, OrderEvent> orderStateMachine;
+    @Resource private StateMachine<OrderState, OrderEvent> orderStateMachine;
 
-    @Autowired
-    private StateMachinePersister<OrderState, OrderEvent, Order> stateMachinePersister;
+    @Resource private StateMachinePersister<OrderState, OrderEvent, Order> stateMachinePersister;
+
+    @Resource private IOrderItemService orderItemService;
+    @Resource private IProductService productService;
+
     @Override
-    public Order create() {
-        // fixme 订单实际的信息待完善
+    public Order create(Long userId) {
         Order order = new Order();
-        order.setUserId(1L);
-        order.setTotalPrice(77L);
+        order.setUserId(userId);
+        order.setTotalPrice(0L);
         order.setOrderStatus(OrderState.WAITING_CONFIRM);
-        baseMapper.insert(order);
+        order.setStatus(StatusEnum.YES.getStatus());
+        order.setCreateDate(new Date());
+        order.setUpdateDate(new Date());
+        int id = baseMapper.insert(order);
         return order;
     }
 
     @Override
-    public Order confirm(Long id) {
-        Order order = baseMapper.selectById(id);
+    public Order confirm(Long orderId) {
+        Order order = baseMapper.selectById(orderId);
+        // 计算总价
+        Long totalPrice = orderItemService.lambdaQuery()
+                .eq(OrderItem::getStatus, StatusEnum.YES.getStatus())
+                .eq(OrderItem::getOrderId, orderId)
+                .list().stream().mapToLong(item -> {
+                    Product product = productService.getById(item.getProductId());
+                    return product.getPrice() * item.getQuantity();
+                }).sum();
+        order.setTotalPrice(totalPrice);
         Message message = MessageBuilder.withPayload(OrderEvent.CONFIRM_ORDER).setHeader(Constant.orderHeader, order).build();
-        log.info("尝试确认，订单号：" + id);
+        log.info("尝试确认，订单号：" + orderId);
         if (!sendEvent(message, order)) {
-            log.error("尝试确认失败, 状态异常，订单号：" + id);
+            log.error("尝试确认失败, 状态异常，订单号：" + orderId);
         }
         return order;
     }

@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface IOrderService extends IService<Order> {
 
-    Order create();
+    Order  create(Long id);
     Order confirm(Long id);
     Order done(Long id);
     //订单发货

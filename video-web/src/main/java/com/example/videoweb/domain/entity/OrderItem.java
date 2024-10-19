@@ -12,27 +12,30 @@ import lombok.Setter;
 
 /**
  * <p>
- * 购物车表
+ * 订单条目表
  * </p>
  *
  * @author anubis
- * @since 2024-10-16
+ * @since 2024-10-19
  */
 @Getter
 @Setter
-@TableName("v_cart")
-@Schema(name = "Cart", description = "购物车表")
-public class Cart {
+@TableName("v_order_item")
+@Schema(name = "OrderItem", description = "订单条目表")
+public class OrderItem {
 
     @Schema(description = "购物车ID")
-    @TableId(value = "cart_id", type = IdType.AUTO)
-    private Long cartId;
+    @TableId(value = "order_item_id", type = IdType.AUTO)
+    private Long orderItemId;
 
     @Schema(description = "用户ID，关联用户表")
     private Long userId;
 
     @Schema(description = "商品ID，关联商品表")
     private Long productId;
+
+    @Schema(description = "订单ID，关联订单表")
+    private Long orderId;
 
     @Schema(description = "数量")
     private Long quantity;

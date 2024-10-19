@@ -1,6 +1,5 @@
 package com.example.videoweb.controller;
 
-import com.example.videoweb.domain.entity.Order;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.service.IOrderService;
 import jakarta.annotation.Resource;
@@ -21,17 +20,6 @@ public class TestController {
 
     @Resource
     private IOrderService orderService;
-
-    @GetMapping("create")
-    public ResultVo create() {
-        return ResultVo.data(orderService.create());
-    }
-
-    @GetMapping("confirm/{orderId}")
-    public ResultVo confirm(@PathVariable(value = "orderId")Long orderId) {
-        Order confirm = orderService.confirm(orderId);
-        return ResultVo.data(confirm);
-    }
     @GetMapping("done/{orderId}")
     public ResultVo done(@PathVariable(value = "orderId")Long orderId) {
         return ResultVo.data(orderService.done(orderId));
