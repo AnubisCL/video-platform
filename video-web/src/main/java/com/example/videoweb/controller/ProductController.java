@@ -3,19 +3,16 @@ package com.example.videoweb.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.entity.ProductCategory;
+import com.example.videoweb.domain.entity.ProductDetail;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.service.IProductCategoryService;
+import com.example.videoweb.service.IProductDetailService;
 import com.example.videoweb.service.IProductService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +30,7 @@ public class ProductController {
 
     @Resource private IProductService productService;
     @Resource private IProductCategoryService productCategoryService;
+    @Resource private IProductDetailService productDetailService;
 
     @GetMapping("getProductCategory")
     public ResultVo getProductCategory() {
@@ -41,6 +39,14 @@ public class ProductController {
                 .eq(ProductCategory::getStatus, StatusEnum.YES.getStatus())
                 .orderByAsc(ProductCategory::getCategoryId)
                 .list());
+    }
+
+    @PostMapping("updateProductInfo")
+    public ResultVo updateProductInfo(@RequestBody Product product) {
+        // todo 图片
+        product.setUpdateDate(new Date());
+        product.setCreateDate(new Date());
+        return ResultVo.data(productService.updateById(product));
     }
 
     @GetMapping("getProductList")
@@ -57,6 +63,12 @@ public class ProductController {
             return map;
         }).collect(Collectors.toList());
         return ResultVo.data(mapList);
+    }
+
+    @GetMapping("getProductDetail/{productDetailId}")
+    public ResultVo getProductDetail(@PathVariable("productDetailId")Long productDetailId) {
+        ProductDetail detail = productDetailService.getById(productDetailId);
+        return ResultVo.data(detail);
     }
 
 

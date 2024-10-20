@@ -1,5 +1,6 @@
 package com.example.videoweb.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.videoweb.domain.Constant;
@@ -104,8 +105,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public List<Order> getOrders() {
-        return baseMapper.selectList(new QueryWrapper<>());
+    public List<Order> getOrders(Long userId) {
+        return baseMapper.selectList(new LambdaQueryWrapper<Order>()
+                .eq(Order::getStatus, StatusEnum.YES.getStatus())
+                .in(Order::getOrderStatus, OrderState.WAITING_COMPLETED, OrderState.COMPLETED)
+                .eq(Order::getUserId, userId)
+                .orderByDesc(Order::getUpdateDate)
+        );
     }
 
 

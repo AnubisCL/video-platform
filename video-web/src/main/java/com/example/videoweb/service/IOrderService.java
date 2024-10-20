@@ -19,5 +19,5 @@ public interface IOrderService extends IService<Order> {
     //订单收货
     Order back(Long id);
     //获取所有订单信息
-    List<Order> getOrders();
+    List<Order> getOrders(Long userId);
 }

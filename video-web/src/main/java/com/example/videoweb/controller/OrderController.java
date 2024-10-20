@@ -7,9 +7,7 @@ import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.enums.OrderState;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.ResultVo;
-import com.example.videoweb.service.IOrderItemService;
-import com.example.videoweb.service.IOrderService;
-import com.example.videoweb.service.IProductService;
+import com.example.videoweb.service.*;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +33,8 @@ public class OrderController {
 
     @Resource private IOrderService orderService;
     @Resource private IProductService productService;
+    @Resource private IProductDetailService productDetailService;
+    @Resource private IProductCategoryService productCategoryService;
     @Resource private IOrderItemService orderItemService;
 
     /**
@@ -53,7 +53,9 @@ public class OrderController {
         List<OrderItem> orderItems = orderItemService.lambdaQuery()
                 .eq(OrderItem::getOrderId, order.getOrderId())
                 .eq(OrderItem::getUserId, userId)
-                .eq(OrderItem::getStatus, StatusEnum.YES).list();
+                .eq(OrderItem::getStatus, StatusEnum.YES)
+                .gt(OrderItem::getQuantity, 0L)
+                .list();
         List<Product> cartList = orderItems.parallelStream().map(item -> {
             Product product = productService.getById(item.getProductId());
             product.setStock(item.getQuantity());
@@ -107,7 +109,7 @@ public class OrderController {
             }
         } else {
             Long quantity = orderItems.get(0).getQuantity();
-            orderItem.setQuantity(type.equals("add") ? quantity+1L : quantity-1L);
+            orderItem.setQuantity(type.equals("add") ? quantity+1L : quantity.equals(0L) ? quantity : quantity-1L);
             orderItem.setOrderItemId(orderItems.get(0).getOrderItemId());
             orderItemService.updateById(orderItem);
         }
@@ -118,6 +120,32 @@ public class OrderController {
     public ResultVo confirm(@PathVariable(value = "orderId")Long orderId) {
         Order confirm = orderService.confirm(orderId);
         return ResultVo.data(confirm);
+    }
+
+    @GetMapping("getOrderDetailInfo/{userId}")
+    public ResultVo getOrderDetailInfo(@PathVariable(value = "userId")Long userId) {
+        List<Order> orders = orderService.getOrders(userId);
+        List<HashMap<String, Object>> list = orders.stream().map(order -> {
+            HashMap<String, Object> resultMap = new HashMap<>();
+            resultMap.put("orderInfo", order);
+            List<OrderItem> orderItems = orderItemService.lambdaQuery()
+                    .eq(OrderItem::getStatus, StatusEnum.YES)
+                    .eq(OrderItem::getOrderId, order.getOrderId()).list();
+            List<HashMap<String, Object>> mapList = orderItems.parallelStream().map(item -> {
+                Product product = productService.getById(item.getProductId());
+                String description = productDetailService.getById(product.getProductDetailId()).getDescription();
+                String categoryName = productCategoryService.getById(product.getCategoryId()).getCategoryName();
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("orderItem", item);
+                hashMap.put("description", description);
+                hashMap.put("categoryName", categoryName);
+                hashMap.put("product", product);
+                return hashMap;
+            }).collect(Collectors.toList());
+            resultMap.put("orderItemList", mapList);
+            return resultMap;
+        }).collect(Collectors.toList());
+        return ResultVo.data(list);
     }
 
 

@@ -33,8 +33,4 @@ public class TestController {
         return ResultVo.data(orderService.cancel(orderId));
     }
 
-    @GetMapping("list")
-    public ResultVo list() {
-        return ResultVo.data(orderService.getOrders());
-    }
 }

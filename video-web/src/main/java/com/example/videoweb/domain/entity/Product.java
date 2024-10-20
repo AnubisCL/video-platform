@@ -44,7 +44,7 @@ public class Product {
     private String thumb;
 
     @Schema(description = "商品评分")
-    private Long rate;
+    private Float rate;
 
     @Schema(description = "商品价格")
     private Long price;
