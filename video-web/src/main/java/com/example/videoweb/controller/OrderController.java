@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,7 +74,7 @@ public class OrderController {
                 .eq(Order::getUserId, userId)
                 .eq(Order::getStatus, StatusEnum.YES)
                 .eq(Order::getOrderStatus, OrderState.WAITING_CONFIRM)
-                .orderByDesc(Order::getUpdateDate)
+                .orderByAsc(Order::getUpdateDate)
                 .list();
         if (!orders.isEmpty()) {
             orders.parallelStream().forEach(order -> {
@@ -111,6 +112,7 @@ public class OrderController {
             Long quantity = orderItems.get(0).getQuantity();
             orderItem.setQuantity(type.equals("add") ? quantity+1L : quantity.equals(0L) ? quantity : quantity-1L);
             orderItem.setOrderItemId(orderItems.get(0).getOrderItemId());
+            orderItem.setUpdateDate(new Date());
             orderItemService.updateById(orderItem);
         }
         return ResultVo.ok();
@@ -146,6 +148,19 @@ public class OrderController {
             return resultMap;
         }).collect(Collectors.toList());
         return ResultVo.data(list);
+    }
+
+    @GetMapping("done/{orderId}")
+    public ResultVo done(@PathVariable(value = "orderId")Long orderId) {
+        return ResultVo.data(orderService.done(orderId));
+    }
+    @GetMapping("back/{orderId}")
+    public ResultVo back(@PathVariable(value = "orderId")Long orderId) {
+        return ResultVo.data(orderService.back(orderId));
+    }
+    @GetMapping("cancel/{orderId}")
+    public ResultVo cancel(@PathVariable(value = "orderId")Long orderId) {
+        return ResultVo.data(orderService.cancel(orderId));
     }
 
 

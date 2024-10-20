@@ -10,6 +10,8 @@ import org.springframework.statemachine.annotation.OnTransition;
 import org.springframework.statemachine.annotation.WithStateMachine;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 /**
  * @Author: chailei
  * @Date: 2024/10/16 16:16
@@ -24,6 +26,7 @@ public class OrderStateListenerImpl {
         log.info("状态机事件【确认创建订单】-开始");
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.WAITING_COMPLETED);
+        order.setUpdateDate(new Date());
         log.info("状态机事件【确认创建订单】-结束：" + message.getHeaders().toString());
         return true;
     }
@@ -33,6 +36,7 @@ public class OrderStateListenerImpl {
         log.info("状态机事件【确认完成订单】-开始");
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.COMPLETED);
+        order.setUpdateDate(new Date());
         log.info("状态机事件【确认完成订单】-结束：" + message.getHeaders().toString());
         return true;
     }
@@ -42,6 +46,7 @@ public class OrderStateListenerImpl {
         log.info("状态机事件【取消订单】-开始");
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.FAILED);
+        order.setUpdateDate(new Date());
         log.info("状态机事件【取消订单】-结束" + message.getHeaders().toString());
         return true;
     }
@@ -51,6 +56,7 @@ public class OrderStateListenerImpl {
         log.info("状态机事件【回退订单】-开始");
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.WAITING_CONFIRM);
+        order.setUpdateDate(new Date());
         log.info("状态机事件【回退订单】-结束" + message.getHeaders().toString());
         return true;
     }

@@ -108,7 +108,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public List<Order> getOrders(Long userId) {
         return baseMapper.selectList(new LambdaQueryWrapper<Order>()
                 .eq(Order::getStatus, StatusEnum.YES.getStatus())
-                .in(Order::getOrderStatus, OrderState.WAITING_COMPLETED, OrderState.COMPLETED)
+                .in(Order::getOrderStatus, OrderState.WAITING_COMPLETED, OrderState.COMPLETED, OrderState.FAILED)
                 .eq(Order::getUserId, userId)
                 .orderByDesc(Order::getUpdateDate)
         );
