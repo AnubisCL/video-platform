@@ -1,10 +1,12 @@
 package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.example.videoweb.base.annotation.ReplaceIpFun;
 import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.entity.ProductCategory;
 import com.example.videoweb.domain.entity.ProductDetail;
 import com.example.videoweb.domain.enums.StatusEnum;
+import com.example.videoweb.domain.vo.ProductListVo;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.service.IProductCategoryService;
 import com.example.videoweb.service.IProductDetailService;
@@ -43,12 +45,12 @@ public class ProductController {
 
     @PostMapping("updateProductInfo")
     public ResultVo updateProductInfo(@RequestBody Product product) {
-        // todo 图片
         product.setUpdateDate(new Date());
         product.setCreateDate(new Date());
         return ResultVo.data(productService.updateById(product));
     }
 
+    @ReplaceIpFun
     @GetMapping("getProductList")
     public ResultVo getProductList() {
         List<Product> productList = productService.lambdaQuery()
@@ -56,11 +58,11 @@ public class ProductController {
         Map<Long, List<Product>> collect = productList.stream()
                 .collect(Collectors.groupingBy(Product::getCategoryId));
         Set<Long> categoryIds = collect.keySet();
-        List<HashMap<String, Object>> mapList = categoryIds.parallelStream().map(id -> {
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("index", productCategoryService.getById(id).getCategoryName());
-            map.put("cardList", collect.get(id));
-            return map;
+        List<ProductListVo> mapList = categoryIds.parallelStream().map(id -> {
+            ProductListVo productListVo = new ProductListVo();
+            productListVo.setIndex(productCategoryService.getById(id).getCategoryName());
+            productListVo.setCardList(collect.get(id));
+            return productListVo;
         }).collect(Collectors.toList());
         return ResultVo.data(mapList);
     }
