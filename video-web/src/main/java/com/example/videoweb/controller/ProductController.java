@@ -50,6 +50,16 @@ public class ProductController {
         return ResultVo.data(productService.updateById(product));
     }
 
+    @PostMapping("createProductInfo")
+    public ResultVo createProductInfo(@RequestBody Product product) {
+        product.setProductDetailId(1L);
+        product.setOriginPrice(product.getPrice());
+        product.setStock(0L);
+        product.setUpdateDate(new Date());
+        product.setCreateDate(new Date());
+        return ResultVo.data(productService.save(product));
+    }
+
     @ReplaceIpFun
     @GetMapping("getProductList")
     public ResultVo getProductList() {
