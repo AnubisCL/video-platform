@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.util.Date;
+
+import com.example.videoweb.base.annotation.ReplaceIp;
+import com.example.videoweb.base.annotation.ReplaceIpEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +23,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ReplaceIpEntity
 @TableName("v_product")
 @Schema(name = "Product", description = "商品表")
 public class Product {
@@ -40,6 +44,7 @@ public class Product {
     @Schema(description = "商品描述")
     private String description;
 
+    @ReplaceIp
     @Schema(description = "商品图片")
     private String thumb;
 
