@@ -2,6 +2,7 @@ package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.example.videoweb.base.annotation.ReplaceIpFun;
+import com.example.videoweb.domain.dto.ConfirmOrderDto;
 import com.example.videoweb.domain.entity.Order;
 import com.example.videoweb.domain.entity.OrderItem;
 import com.example.videoweb.domain.entity.Product;
@@ -13,10 +14,7 @@ import com.example.videoweb.domain.vo.OrderItemInfoVo;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.service.*;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
@@ -122,9 +120,9 @@ public class OrderController {
         return ResultVo.ok();
     }
 
-    @GetMapping("confirm/{orderId}")
-    public ResultVo confirm(@PathVariable(value = "orderId")Long orderId) {
-        Order confirm = orderService.confirm(orderId);
+    @PostMapping("confirm")
+    public ResultVo confirm(@RequestBody ConfirmOrderDto confirmOrderDto) {
+        Order confirm = orderService.confirm(confirmOrderDto);
         return ResultVo.data(confirm);
     }
 

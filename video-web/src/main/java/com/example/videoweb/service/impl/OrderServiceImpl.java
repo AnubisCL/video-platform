@@ -1,9 +1,9 @@
 package com.example.videoweb.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.videoweb.domain.Constant;
+import com.example.videoweb.domain.dto.ConfirmOrderDto;
 import com.example.videoweb.domain.entity.Order;
 import com.example.videoweb.domain.entity.OrderItem;
 import com.example.videoweb.domain.entity.Product;
@@ -55,7 +55,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public Order confirm(Long orderId) {
+    public Order confirm(ConfirmOrderDto confirmOrderDto) {
+        Long orderId = confirmOrderDto.getOrderId();
         Order order = baseMapper.selectById(orderId);
         // 计算总价
         Long totalPrice = orderItemService.lambdaQuery()
@@ -66,6 +67,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     return product.getPrice() * item.getQuantity();
                 }).sum();
         order.setTotalPrice(totalPrice);
+        //订单时间（）
+        order.setOrderDate(confirmOrderDto.getOrderDate());
+        //订单标签（早/中/晚）
+        order.setOrderType(confirmOrderDto.getOrderType());
+        order.setOrderRemark(confirmOrderDto.getOrderRemark());
         Message message = MessageBuilder.withPayload(OrderEvent.CONFIRM_ORDER).setHeader(Constant.orderHeader, order).build();
         log.info("尝试确认，订单号：" + orderId);
         if (!sendEvent(message, order)) {

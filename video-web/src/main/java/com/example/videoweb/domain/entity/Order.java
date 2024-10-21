@@ -36,6 +36,15 @@ public class Order {
     @Schema(description = "订单总价")
     private Long totalPrice;
 
+    @Schema(description = "订单时间")
+    private String orderDate;
+
+    @Schema(description = "订单类型（早/中/晚）")
+    private String orderType;
+
+    @Schema(description = "订单备注")
+    private String orderRemark;
+
     //mp指定状态机枚举映射
     @Schema(description = "订单状态（状态机）")
     private OrderState orderStatus;

@@ -1,6 +1,7 @@
 package com.example.videoweb.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.videoweb.domain.dto.ConfirmOrderDto;
 import com.example.videoweb.domain.entity.Order;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public interface IOrderService extends IService<Order> {
 
     Order  create(Long id);
-    Order confirm(Long id);
+    Order confirm(ConfirmOrderDto confirmOrderDto);
     Order done(Long id);
     //订单发货
     Order cancel(Long id);
