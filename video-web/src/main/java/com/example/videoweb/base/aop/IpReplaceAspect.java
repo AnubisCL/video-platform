@@ -15,6 +15,8 @@ import org.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -43,25 +45,28 @@ public class IpReplaceAspect {
 
         if (result instanceof ResultVo) {
             ResultVo resultVo = (ResultVo) result;
-            HttpServletRequest request = (HttpServletRequest) joinPoint.getArgs()[1];
 
-            String protocolType = IpUtil.getIpAddressProtocolType(request, domainHost);
-            IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String protocolType = IpUtil.getIpAddressProtocolType(request, domainHost);
+                IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
 
-            Object data = resultVo.getData();
-            if (data instanceof String) { // 直接返回带IP的String
+                Object data = resultVo.getData();
+                if (data instanceof String) { // 直接返回带IP的String
                     String value = (String) data;
                     String replacedValue = replaceIp(value, protocolType, ipInfo);
                     ((ResultVo) result).setData(replacedValue);
-            } else if(data instanceof List) {
-                List dataList =  (List) data;
-                for (Object object : dataList) {
-                    if (object.getClass().isAnnotationPresent(ReplaceIpEntity.class)) {
-                        getReplaceIpAnnotation(object, protocolType, ipInfo);
+                } else if(data instanceof List) {
+                    List dataList =  (List) data;
+                    for (Object object : dataList) {
+                        if (object.getClass().isAnnotationPresent(ReplaceIpEntity.class)) {
+                            getReplaceIpAnnotation(object, protocolType, ipInfo);
+                        }
                     }
+                } else if (data.getClass().isAnnotationPresent(ReplaceIpEntity.class)) {
+                    getReplaceIpAnnotation(data, protocolType, ipInfo);
                 }
-            } else if (data.getClass().isAnnotationPresent(ReplaceIpEntity.class)) {
-                getReplaceIpAnnotation(data, protocolType, ipInfo);
             }
         }
 

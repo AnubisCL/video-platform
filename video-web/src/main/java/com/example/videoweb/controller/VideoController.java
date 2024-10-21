@@ -19,10 +19,8 @@ import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.domain.vo.UploadFileVo;
 import com.example.videoweb.domain.vo.VideoVo;
 import com.example.videoweb.service.*;
-import com.example.videoweb.utils.IpUtil;
 import com.example.videoweb.utils.ProcessUtil;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.CacheManager;
@@ -88,7 +86,7 @@ public class VideoController {
 
     @ReplaceIpFun
     @PostMapping("getVideoList")
-    public ResultVo getVideoList(@Valid @RequestBody VideoDto videoDto, HttpServletRequest request) {
+    public ResultVo getVideoList(@Valid @RequestBody VideoDto videoDto) {
         Long userId = StpUtil.getLoginIdAsLong();
         PageDto pageDto = videoDto.getPage();
         Page<Video> page = Page.of(pageDto.getCurrent(), pageDto.getSize());
@@ -130,8 +128,6 @@ public class VideoController {
             }
         });
 
-        String protocolType = IpUtil.getIpAddressProtocolType(request, domainHost);
-        IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
 
         Page<Video> resultPage = videoService.page(page, queryWrapper);
         List<VideoVo> records = resultPage.getRecords()
@@ -148,7 +144,7 @@ public class VideoController {
 
     @ReplaceIpFun
     @PostMapping("uploadFile")
-    public ResultVo uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public ResultVo uploadFile(@RequestParam("file") MultipartFile file) {
         Long userId = StpUtil.getLoginIdAsLong();
         FileInfo fileInfo = new FileInfo();
         fileInfo.setUserId(userId);
