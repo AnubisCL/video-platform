@@ -154,6 +154,16 @@ public class OrderController {
         return ResultVo.data(orderDetailInfoVos);
     }
 
+    @GetMapping("getOrderSize/{userId}")
+    public ResultVo getOrderSize(@PathVariable(value = "userId")Long userId) {
+        List<Order> orders = orderService.
+                lambdaQuery().eq(Order::getStatus, StatusEnum.YES.getStatus())
+                .in(Order::getOrderStatus, OrderState.WAITING_COMPLETED)
+                //.eq(Order::getUserId, userId)
+                .list();
+        return ResultVo.data(orders.size());
+    }
+
     @GetMapping("done/{orderId}")
     public ResultVo done(@PathVariable(value = "orderId")Long orderId) {
         return ResultVo.data(orderService.done(orderId));
