@@ -7,6 +7,7 @@ import com.example.videoweb.domain.entity.OrderItem;
 import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.enums.OrderState;
 import com.example.videoweb.domain.enums.StatusEnum;
+import com.example.videoweb.domain.vo.CartHisInfoVo;
 import com.example.videoweb.domain.vo.OrderDetailInfoVo;
 import com.example.videoweb.domain.vo.OrderItemInfoVo;
 import com.example.videoweb.domain.vo.ResultVo;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +45,7 @@ public class OrderController {
      * 获取上次选择的购物车信息
      * @return
      */
+    @ReplaceIpFun
     @GetMapping("getCartHisInfo/{userId}")
     public ResultVo getCartHisInfo(@PathVariable("userId")Long userId) {
         List<Order> orders = orderService.lambdaQuery()
@@ -65,10 +66,10 @@ public class OrderController {
             product.setStock(item.getQuantity());
             return product;
         }).collect(Collectors.toList());
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("currentOrderId", order.getOrderId());
-        map.put("cartItemList", cartList);
-        return ResultVo.data(map);
+        CartHisInfoVo cartHisInfoVo = new CartHisInfoVo();
+        cartHisInfoVo.setCurrentOrderId(order.getOrderId());
+        cartHisInfoVo.setCartItemList(cartList);
+        return ResultVo.data(cartHisInfoVo);
     }
 
     @GetMapping("clearCartHisInfo/{userId}")
