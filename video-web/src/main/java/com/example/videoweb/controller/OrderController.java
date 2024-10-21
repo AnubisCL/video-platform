@@ -1,11 +1,14 @@
 package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.example.videoweb.base.annotation.ReplaceIpFun;
 import com.example.videoweb.domain.entity.Order;
 import com.example.videoweb.domain.entity.OrderItem;
 import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.enums.OrderState;
 import com.example.videoweb.domain.enums.StatusEnum;
+import com.example.videoweb.domain.vo.OrderDetailInfoVo;
+import com.example.videoweb.domain.vo.OrderItemInfoVo;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.service.*;
 import jakarta.annotation.Resource;
@@ -124,30 +127,31 @@ public class OrderController {
         return ResultVo.data(confirm);
     }
 
+    @ReplaceIpFun
     @GetMapping("getOrderDetailInfo/{userId}")
     public ResultVo getOrderDetailInfo(@PathVariable(value = "userId")Long userId) {
         List<Order> orders = orderService.getOrders(userId);
-        List<HashMap<String, Object>> list = orders.stream().map(order -> {
-            HashMap<String, Object> resultMap = new HashMap<>();
-            resultMap.put("orderInfo", order);
+        List<OrderDetailInfoVo> orderDetailInfoVos = orders.stream().map(order -> {
+            OrderDetailInfoVo orderDetailInfoVo = new OrderDetailInfoVo();
+            orderDetailInfoVo.setOrderInfo(order);
             List<OrderItem> orderItems = orderItemService.lambdaQuery()
                     .eq(OrderItem::getStatus, StatusEnum.YES)
                     .eq(OrderItem::getOrderId, order.getOrderId()).list();
-            List<HashMap<String, Object>> mapList = orderItems.parallelStream().map(item -> {
+            List<OrderItemInfoVo> orderItemInfoVos = orderItems.parallelStream().map(item -> {
                 Product product = productService.getById(item.getProductId());
                 String description = productDetailService.getById(product.getProductDetailId()).getDescription();
                 String categoryName = productCategoryService.getById(product.getCategoryId()).getCategoryName();
-                HashMap<String, Object> hashMap = new HashMap<>();
-                hashMap.put("orderItem", item);
-                hashMap.put("description", description);
-                hashMap.put("categoryName", categoryName);
-                hashMap.put("product", product);
-                return hashMap;
+                OrderItemInfoVo orderItemInfoVo = new OrderItemInfoVo();
+                orderItemInfoVo.setOrderItem(item);
+                orderItemInfoVo.setCategoryName(categoryName);
+                orderItemInfoVo.setDescription(description);
+                orderItemInfoVo.setProduct(product);
+                return orderItemInfoVo;
             }).collect(Collectors.toList());
-            resultMap.put("orderItemList", mapList);
-            return resultMap;
+            orderDetailInfoVo.setOrderItemList(orderItemInfoVos);
+            return orderDetailInfoVo;
         }).collect(Collectors.toList());
-        return ResultVo.data(list);
+        return ResultVo.data(orderDetailInfoVos);
     }
 
     @GetMapping("done/{orderId}")
