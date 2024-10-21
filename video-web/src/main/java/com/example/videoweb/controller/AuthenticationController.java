@@ -68,8 +68,11 @@ public class AuthenticationController {
     @PostMapping("signIn")
     public ResultVo signIn(@RequestBody @Valid UserDto userDto) {
         String signType = userDto.getSignType();
-        if (signType.equals(SignEnum.SIGN_IN.getType()) && signEnable) {
+        if (signType.equals(SignEnum.SIGN_IN.getType())) {
             try {
+                if (!signEnable) {
+                    throw new RuntimeException("未开启注册");
+                }
                 userService.save(User.builder()
                         .email(userDto.getEmail())
                         .passwordHash(userDto.getPasswordHash())

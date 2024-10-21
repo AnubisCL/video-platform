@@ -60,7 +60,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     public void downloadVideo(Task task) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         String dateStr = LocalDate.now().format(formatter);
-        String path = createDateDirectory(baseDirectoryProperties.getBackVideo(), dateStr);
+        String path = ProcessUtil.createDateDirectory(baseDirectoryProperties.getBackVideo(), dateStr);
         String videoOutputPath = path + File.separator + task.getTaskId() + ".mp4";
         String gifOutputPath = path + File.separator + task.getTaskId() + ".gif";
 
@@ -157,7 +157,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         try {
             videoService.save(video);
 
-            loadDirectory = createDateDirectory(baseDirectoryProperties.getHlsVideo(), String.valueOf(video.getVideoId()));
+            loadDirectory = ProcessUtil.createDateDirectory(baseDirectoryProperties.getHlsVideo(), String.valueOf(video.getVideoId()));
             String replaceVideoPath = m3u8Suffix + video.getVideoId() + File.separator + INDEX_M3U8;
             Video videoUpdate = new Video();
             videoUpdate.setVideoId(video.getVideoId());
@@ -232,21 +232,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         task.setDownloadJson(json.toJSONString());
         task.setTaskStatus(TaskStatusEnum.DOWNLOAD_COMPLETE.getCode());
         taskMapper.updateById(task);
-    }
-
-    public static String createDateDirectory(String baseDir, String dirStr) {
-        String fullDirPath = baseDir + dirStr;
-        Path path = Paths.get(fullDirPath);
-        try {
-            if (!Files.exists(path.getParent())) {
-                Files.createDirectories(path.getParent());
-            }
-            Files.createDirectory(path); // 注意这里改为单个目录创建
-            log.info("Directory created: " + fullDirPath);
-        } catch (IOException e) {
-            log.error("Error creating directory: " + e.getMessage());
-        }
-        return fullDirPath;
     }
 }
 

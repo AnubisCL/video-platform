@@ -6,6 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -266,5 +269,20 @@ public class ProcessUtil {
         }
         errorReader.close();
         log.error("Error output: {}", errorOutput.toString());
+    }
+
+    public static String createDateDirectory(String baseDir, String dirStr) {
+        String fullDirPath = baseDir + dirStr;
+        Path path = Paths.get(fullDirPath);
+        try {
+            if (!Files.exists(path.getParent())) {
+                Files.createDirectories(path.getParent());
+            }
+            Files.createDirectory(path); // 注意这里改为单个目录创建
+            log.info("Directory created: " + fullDirPath);
+        } catch (IOException e) {
+            log.error("Error creating directory: " + e.getMessage());
+        }
+        return fullDirPath;
     }
 }

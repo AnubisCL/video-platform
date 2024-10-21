@@ -10,6 +10,7 @@ spring:
 
 base-directory:
   back-video: /home/back/video/ # 视频下载路径
+  back-file: /home/back/file/ # 文件下载/上传路径
   hls-video: /home/video-hls/videos/ # m3u8视频下载路径
   ehcache-path: /home/webui/video-platform/ehcache/ # ehcache路径
 
@@ -36,6 +37,7 @@ nginx-config:
   m3u8-suffix: http://127.0.0.1:8087/hls/
   mp4-suffix: http://127.0.0.1:8087/back/video/
   gif-suffix: http://127.0.0.1:8087/back/video/
+  file-suffix: http://127.0.0.1:8087/back/file/
 
 ############## thread-pool 配置 ##############
 thread-pool:

@@ -1,5 +1,6 @@
 package com.example.videoweb.domain.vo;
 
+import com.example.videoweb.base.annotation.ReplaceIpEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.Data;
  */
 @Data
 @Builder
+@ReplaceIpEntity
 public class PageVo<T> {
 
     @Schema(description = "总条数")
@@ -17,6 +19,7 @@ public class PageVo<T> {
     @Schema(description = "总页数")
     private Long pages;
     @Schema(description = "数据")
+    @ReplaceIpEntity
     private T records;
 
 

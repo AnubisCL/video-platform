@@ -1,26 +1,25 @@
 package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.videoweb.base.annotation.ReplaceIpFun;
 import com.example.videoweb.base.config.CacheConfig;
+import com.example.videoweb.base.properties.BaseDirectoryProperties;
 import com.example.videoweb.domain.cache.IpInfo;
 import com.example.videoweb.domain.dto.PageDto;
 import com.example.videoweb.domain.dto.VideoDto;
-import com.example.videoweb.domain.entity.Collect;
-import com.example.videoweb.domain.entity.History;
-import com.example.videoweb.domain.entity.Like;
-import com.example.videoweb.domain.entity.Video;
+import com.example.videoweb.domain.entity.*;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.PageVo;
 import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.domain.vo.VideoVo;
-import com.example.videoweb.service.ICollectService;
-import com.example.videoweb.service.IHistoryService;
-import com.example.videoweb.service.ILikeService;
-import com.example.videoweb.service.IVideoService;
+import com.example.videoweb.service.*;
+import com.example.videoweb.utils.IpUtil;
+import com.example.videoweb.utils.ProcessUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,13 +28,14 @@ import org.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,6 +58,8 @@ public class VideoController {
     @Resource private ICollectService collectService;
     @Resource private ILikeService likeService;
     @Resource private IHistoryService historyService;
+    @Resource private IFileInfoService fileInfoService;
+    @Resource private BaseDirectoryProperties baseDirectoryProperties;
     @Resource @Qualifier("ehCacheManager") private CacheManager cacheManager;
 
     @Value("${nginx-config.protocol-type.local.name}") private String local;
@@ -66,7 +68,24 @@ public class VideoController {
     @Value("${nginx-config.protocol-type.ipv6.name}") private String ipv6;
     @Value("${nginx-config.protocol-type.domain.name}") private String domain;
     @Value("${nginx-config.protocol-type.domain.host}") private String domainHost;
+    @Value("${nginx-config.file-suffix}") private String fileSuffix;
 
+    private static HashSet<String> fileTypeList;
+    static {
+        fileTypeList = new HashSet<String>();
+        fileTypeList.add("mp4");
+        fileTypeList.add("gif");
+        fileTypeList.add("pdf");
+        fileTypeList.add("docx");
+        fileTypeList.add("xlsx");
+        fileTypeList.add("md");
+        fileTypeList.add("png");
+        fileTypeList.add("jpg");
+        fileTypeList.add("jpeg");
+    }
+
+
+    @ReplaceIpFun
     @PostMapping("getVideoList")
     public ResultVo getVideoList(@Valid @RequestBody VideoDto videoDto, HttpServletRequest request) {
         Long userId = StpUtil.getLoginIdAsLong();
@@ -110,71 +129,72 @@ public class VideoController {
             }
         });
 
-        String protocolType = getIpAddressProtocolType(request);
+        String protocolType = IpUtil.getIpAddressProtocolType(request, domainHost);
         IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
 
         Page<Video> resultPage = videoService.page(page, queryWrapper);
         List<VideoVo> records = resultPage.getRecords()
-                .stream().map(video -> {
-                    VideoVo.VideoVoBuilder builder = VideoVo.builder();
-                    builder.videoId(video.getVideoId()).title(video.getTitle());
-                    if (protocolType.equals(domain)){
-                        builder.imageUrl(video.getImageUrl().replace(localIp, domainHost))
-                                .videoUrl(video.getHlsUrl().replace(localIp, domainHost));
-                    }
-                    if (protocolType.equals(ipv6) && ipInfo.getIsIpv6()) {
-                        String replaceIpv6 = "[" + ipInfo.getIpv6() + "]";
-                        builder.imageUrl(video.getImageUrl().replace(localIp, replaceIpv6))
-                                .videoUrl(video.getHlsUrl().replace(localIp, replaceIpv6));
-                    }
-                    if ((protocolType.equals(ipv4) || protocolType.equals(local)) && ipInfo.getIsIpv4()) {
-                        builder.imageUrl(video.getImageUrl().replace(localIp, ipInfo.getIpv4()))
-                                .videoUrl(video.getHlsUrl().replace(localIp, ipInfo.getIpv4()));
-                    } else if (protocolType.equals(local)) {
-                        builder.imageUrl(video.getImageUrl()).videoUrl(video.getHlsUrl());
-                    }
-                    return builder.build();
-                }).toList();
+                .stream().map(video -> VideoVo.builder()
+                        .videoId(video.getVideoId())
+                        .title(video.getTitle())
+                        .imageUrl(video.getImageUrl())
+                        .videoUrl(video.getHlsUrl())
+                        .build())
+                .toList();
         return ResultVo.data(PageVo.builder().pages(resultPage.getPages())
                 .total(resultPage.getTotal()).records(records).build());
     }
 
-    private String getIpAddressProtocolType(HttpServletRequest request) {
-        boolean isLocal = false;
-        boolean isIpv4 = false;
-        boolean isIpv6 = false;
-        String host = request.getHeader("host");
-        if (host.equals(domainHost)) return "domain";
-        //ipv6
-        String replace = host.replace("[", "").replace("]", "");
-        // 判断host是ipv4还是ipv6还是127.0.0.1/localhost
-        // 使用 InetAddress 来判断 IP 地址类型
-        try {
-            InetAddress inetAddress = InetAddress.getByName(replace); // 去掉可能存在的端口号
-            if (inetAddress.isLoopbackAddress()) {
-                isLocal = true;
-            } else if (inetAddress instanceof java.net.Inet4Address) {
-                isIpv4 = true;
-            } else if (inetAddress instanceof java.net.Inet6Address) {
-                isIpv6 = true;
-            }
-        } catch (UnknownHostException e) {
-            // 如果 host 不是一个 IP 地址，尝试使用正则表达式判断
-            if ("localhost".equalsIgnoreCase(replace)) {
-                log.info("Host is localhost.");
-                isLocal = true;
-            } else if (replace.matches("^([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})$")) {
-                isIpv4 = true;
-            } else if (replace.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
-                isIpv6 = true;
-            } else {
-                log.warn("Host is not recognized as an IP address or localhost.");
-            }
+    @ReplaceIpFun
+    @PostMapping("uploadFile")
+    public ResultVo uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        Long userId = StpUtil.getLoginIdAsLong();
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setUserId(userId);
+        fileInfoService.save(fileInfo);
+        Long fileId = fileInfo.getFileId();
+        log.info("文件Id：" + fileId);
+        String originalFilename = file.getOriginalFilename();
+        fileInfo.setFileName(originalFilename);
+        log.info("文件名：" + originalFilename);
+        String[] split = originalFilename.split("\\.");
+        String fileType = split[split.length - 1];
+        log.info("文件格式：" + fileType);
+        if (!fileTypeList.contains(fileType)) {
+            return ResultVo.error("文件格式不允许上传");
         }
-        log.info("--- isLocal:{}, , isIpv4: {}, isIpv6:{}", isLocal, isIpv4, isIpv6);
-        if (isIpv4) return "ipv4";
-        else if (isIpv6) return "ipv6";
-        else return "local";
+
+        try {
+            int length = file.getBytes().length;
+            log.info("文件大小：" + String.valueOf(length/1000) + "KB");
+            fileInfo.setFileSize(String.valueOf(length/1000) + "KB");
+            if (length > 100000000) { //100M
+                return ResultVo.error("文件太大不允许上传");
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            fileInfoService.removeById(fileId);
+            return ResultVo.error("文件格式异常不允许上传");
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String dateStr = LocalDate.now().format(formatter);
+        String dataPath = ProcessUtil.createDateDirectory(baseDirectoryProperties.getBackFile(), dateStr);
+        String filePath = dataPath + File.separator + fileId + "." + fileType;
+        log.info("文件filePath：" + filePath);
+        fileInfo.setFilePath(filePath);
+        String fileUrl = filePath.replace(baseDirectoryProperties.getBackFile(), fileSuffix);
+        log.info("文件fileUrl：" + fileUrl);
+        fileInfo.setFileUrl(fileUrl);
+        File saveFile = new File(filePath);
+        try {
+            file.transferTo(saveFile);
+            fileInfoService.updateById(fileInfo);
+        } catch (IOException e) {
+            fileInfoService.removeById(fileId);
+            log.error(e.getMessage());
+            return ResultVo.error("文件上传失败");
+        }
+        return ResultVo.data(fileInfo.getFileUrl());
     }
 
 

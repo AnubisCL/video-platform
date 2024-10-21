@@ -58,7 +58,7 @@ public class CodeGenerator {
                     List<IFill> list = new ArrayList<>();
                     list.add(new Column("create_date", FieldFill.INSERT));
                     list.add(new Column("update_date", FieldFill.INSERT_UPDATE));
-                    builder.addInclude("v_order_item") // 设置需要生成的表名
+                    builder.addInclude("v_file_info") // 设置需要生成的表名
                             .addTablePrefix("v_") // 设置过滤表前缀
                             .entityBuilder()
                             .enableLombok()

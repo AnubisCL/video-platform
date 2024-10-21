@@ -16,4 +16,5 @@ public class BaseDirectoryProperties {
     private String backVideo; // 视频下载路径
     private String hlsVideo; // m3u8视频下载路径
     private String ehcachePath; // 缓存路径
+    private String backFile; // 文件路径
 }
