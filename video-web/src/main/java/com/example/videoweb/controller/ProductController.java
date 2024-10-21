@@ -58,13 +58,13 @@ public class ProductController {
         Map<Long, List<Product>> collect = productList.stream()
                 .collect(Collectors.groupingBy(Product::getCategoryId));
         Set<Long> categoryIds = collect.keySet();
-        List<ProductListVo> mapList = categoryIds.stream().map(id -> {
+        List<ProductListVo> productListVos = categoryIds.stream().map(id -> {
             ProductListVo productListVo = new ProductListVo();
             productListVo.setIndex(productCategoryService.getById(id).getCategoryName());
             productListVo.setCardList(collect.get(id));
             return productListVo;
         }).collect(Collectors.toList());
-        return ResultVo.data(mapList);
+        return ResultVo.data(productListVos);
     }
 
     @GetMapping("getProductDetail/{productDetailId}")
