@@ -16,6 +16,7 @@ import com.example.videoweb.domain.entity.*;
 import com.example.videoweb.domain.enums.StatusEnum;
 import com.example.videoweb.domain.vo.PageVo;
 import com.example.videoweb.domain.vo.ResultVo;
+import com.example.videoweb.domain.vo.UploadFileVo;
 import com.example.videoweb.domain.vo.VideoVo;
 import com.example.videoweb.service.*;
 import com.example.videoweb.utils.IpUtil;
@@ -194,7 +195,10 @@ public class VideoController {
             log.error(e.getMessage());
             return ResultVo.error("文件上传失败");
         }
-        return ResultVo.data(fileInfo.getFileUrl());
+        UploadFileVo uploadFileVo = new UploadFileVo();
+        uploadFileVo.setFileUrl(fileInfo.getFileUrl());
+        uploadFileVo.setReplaceFileUrl(fileInfo.getFileUrl());
+        return ResultVo.data(uploadFileVo);
     }
 
 
