@@ -64,6 +64,8 @@ public class VideoController {
     @Value("${nginx-config.protocol-type.local.local-ipv4-ip}") private String localIp;
     @Value("${nginx-config.protocol-type.ipv4.name}") private String ipv4;
     @Value("${nginx-config.protocol-type.ipv6.name}") private String ipv6;
+    @Value("${nginx-config.protocol-type.domain.name}") private String domain;
+    @Value("${nginx-config.protocol-type.domain.host}") private String domainHost;
 
     @PostMapping("getVideoList")
     public ResultVo getVideoList(@Valid @RequestBody VideoDto videoDto, HttpServletRequest request) {
@@ -116,6 +118,10 @@ public class VideoController {
                 .stream().map(video -> {
                     VideoVo.VideoVoBuilder builder = VideoVo.builder();
                     builder.videoId(video.getVideoId()).title(video.getTitle());
+                    if (protocolType.equals(domain)){
+                        builder.imageUrl(video.getImageUrl().replace(localIp, domainHost))
+                                .videoUrl(video.getHlsUrl().replace(localIp, domainHost));
+                    }
                     if (protocolType.equals(ipv6) && ipInfo.getIsIpv6()) {
                         String replaceIpv6 = "[" + ipInfo.getIpv6() + "]";
                         builder.imageUrl(video.getImageUrl().replace(localIp, replaceIpv6))
@@ -138,6 +144,7 @@ public class VideoController {
         boolean isIpv4 = false;
         boolean isIpv6 = false;
         String host = request.getHeader("host");
+        if (host.equals(domainHost)) return "domain";
         //ipv6
         String replace = host.replace("[", "").replace("]", "");
         // 判断host是ipv4还是ipv6还是127.0.0.1/localhost
