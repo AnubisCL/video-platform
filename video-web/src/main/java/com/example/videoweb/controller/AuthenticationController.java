@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +49,8 @@ public class AuthenticationController {
     @Resource private IUserService userService;
     @Resource private IRoleService roleService;
     @Resource private IMenuService menuService;
+
+    @Value("${sign.enable}") private boolean signEnable;
     @Resource @Qualifier("ehCacheManager") private CacheManager ehCacheManager;
     private static Cache<Long, RSAInfo> rsaInfoCache;
 
@@ -65,7 +68,7 @@ public class AuthenticationController {
     @PostMapping("signIn")
     public ResultVo signIn(@RequestBody @Valid UserDto userDto) {
         String signType = userDto.getSignType();
-        if (signType.equals(SignEnum.SIGN_IN.getType())) {
+        if (signType.equals(SignEnum.SIGN_IN.getType()) && signEnable) {
             try {
                 userService.save(User.builder()
                         .email(userDto.getEmail())

@@ -13,6 +13,9 @@ base-directory:
   hls-video: /home/video-hls/videos/ # m3u8视频下载路径
   ehcache-path: /home/webui/video-platform/ehcache/ # ehcache路径
 
+sign:
+  enable: false
+
 ffmpeg:
   log-level: warning
   hls-time: 60
