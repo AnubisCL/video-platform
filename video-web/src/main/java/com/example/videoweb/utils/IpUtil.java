@@ -23,13 +23,16 @@ public class IpUtil {
 
     public static void main(String[] args) {
         try {
-            String wifiIpAddress = getWifiIpAddress("en0");
-            System.out.println("WIFI IP Address: " + wifiIpAddress);
+            //String wifiIpAddress = getWifiIpAddress("en0");
+            //System.out.println("WIFI IP Address: " + wifiIpAddress);
 
-            String s = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", TEST_IP_TYPE), 5, TimeUnit.SECONDS);
-            String s2 = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", GET_IPV6), 5, TimeUnit.SECONDS);
-
-            System.out.println(s);
+            //String s = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", TEST_IP_TYPE), 5, TimeUnit.SECONDS);
+            //String s2 = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", GET_IPV6), 5, TimeUnit.SECONDS);
+            String ipv6Address = "****";
+            String apikey = "***";
+            String host = "***";
+            String s2 = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", "--location", "--request", "POST", "https://api.dnsexit.com/dns/ud/?apikey=" + apikey, "--data-urlencode", "ip="+ipv6Address, "--data-urlencode", "host=" + host),5, TimeUnit.SECONDS);
+            System.out.println(s2);
         } catch (Exception e) {
             System.err.println("Error fetching WIFI IP address: " + e.getMessage());
         }

@@ -35,6 +35,8 @@ public class IpInfoSchedule {
     private String ipv4LanName;
     @Value("${nginx-config.protocol-type.domain.api-key}")
     private String apiKey;
+    @Value("${nginx-config.protocol-type.domain.host}")
+    private String host;
     @Resource @Qualifier("ehCacheManager") private CacheManager ehCacheManager;
 
     @PostConstruct
@@ -84,7 +86,7 @@ public class IpInfoSchedule {
                 log.warn("获取 ipv6Address 为 NULL.");
             }
             //更新DNS
-            String result = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", "https://api.dnsexit.com/dns/ud/?apikey=" + apiKey, "-d", "ip=" + ipv6Address, "host=anubis.work.gd"), 3, TimeUnit.SECONDS);
+            String result = ProcessUtil.executeCommandWithResult(Arrays.asList("curl", "--location", "--request", "POST", "https://api.dnsexit.com/dns/ud/?apikey=" + apiKey, "--data-urlencode", "ip=" + ipv6Address, "--data-urlencode", "host=" + host),5, TimeUnit.SECONDS);
             log.info("更新DNS =>" + result);
             ipCache.put(CacheConfig.IP_CACHE_NAME, newIpInfo);
             log.info("刷新磁盘缓存 ipInfo: {}", JSON.toJSONString(newIpInfo));

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set curl command to update the IP
-command="curl https://api.dnsexit.com/dns/ud/?apikey=***** -d host=****"
+command="curl https://api.dnsexit.com/dns/ud/?apikey=***** -d ip=***** host=****"
 
 if [ -d "/var/log" ]; then
  command="$command >> /var/log/ipupdate.log"
