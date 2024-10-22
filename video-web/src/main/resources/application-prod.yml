@@ -34,6 +34,7 @@ nginx-config:
     domain:
       name: domain
       host: domain-host
+      api-key: api-key
   m3u8-suffix: http://127.0.0.1:8087/hls/
   mp4-suffix: http://127.0.0.1:8087/back/video/
   gif-suffix: http://127.0.0.1:8087/back/video/
