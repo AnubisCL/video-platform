@@ -135,6 +135,7 @@ public class OrderController {
             orderDetailInfoVo.setOrderInfo(order);
             List<OrderItem> orderItems = orderItemService.lambdaQuery()
                     .eq(OrderItem::getStatus, StatusEnum.YES)
+                    .gt(OrderItem::getQuantity, 0L)
                     .eq(OrderItem::getOrderId, order.getOrderId()).list();
             List<OrderItemInfoVo> orderItemInfoVos = orderItems.parallelStream().map(item -> {
                 Product product = productService.getById(item.getProductId());
