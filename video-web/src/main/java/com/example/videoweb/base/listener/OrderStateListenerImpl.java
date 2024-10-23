@@ -2,15 +2,25 @@ package com.example.videoweb.base.listener;
 
 import com.example.videoweb.domain.Constant;
 import com.example.videoweb.domain.entity.Order;
+import com.example.videoweb.domain.entity.OrderItem;
+import com.example.videoweb.domain.entity.Product;
 import com.example.videoweb.domain.enums.OrderEvent;
 import com.example.videoweb.domain.enums.OrderState;
+import com.example.videoweb.domain.enums.StatusEnum;
+import com.example.videoweb.service.IOrderItemService;
+import com.example.videoweb.service.IProductService;
+import com.example.videoweb.utils.QMsgUtil;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.statemachine.annotation.OnTransition;
 import org.springframework.statemachine.annotation.WithStateMachine;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: chailei
@@ -21,12 +31,21 @@ import java.util.Date;
 @WithStateMachine(name = "orderStateMachine")
 public class OrderStateListenerImpl {
 
+    @Value("${q-msg.enable}")
+    private Boolean qMsgEnable;
+
+    @Value("${q-msg.key}")
+    private String qMsgKey;
+    @Resource private IOrderItemService orderItemService;
+    @Resource private IProductService productService;
+
     @OnTransition(source = "WAITING_CONFIRM", target = "WAITING_COMPLETED")
     public boolean confirmTransition(Message<OrderEvent> message) {
         log.info("状态机事件【确认创建订单】-开始");
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.WAITING_COMPLETED);
         order.setUpdateDate(new Date());
+        toMsg(order, "订单创建");
         log.info("状态机事件【确认创建订单】-结束：" + message.getHeaders().toString());
         return true;
     }
@@ -37,51 +56,7 @@ public class OrderStateListenerImpl {
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.COMPLETED);
         order.setUpdateDate(new Date());
-
-        //todo 消息推送
-        //var pushLink ="https://qmsg.zendee.cn/send/<%- theme.qMsg.qMsgKey %>";
-        //    <!--var siteName = "<%- config.title %>'s Blog";-->
-        //    var valineButton=document.getElementsByClassName("vsubmit vbtn")[0];
-        //    // var title = siteName + "上又有新评论啦~!\n";
-        //
-        //    function send_valine() {
-        //      //获取元素信息
-        //      var pageurl = document.URL;
-        //      var pagename = document.title;
-        //      var pushtime = new Date();
-        //      var vnick = document.getElementsByClassName("vnick vinput")[0].value;
-        //      var vmail = document.getElementsByClassName("vmail vinput")[0].value;
-        //      var vlink = document.getElementsByClassName("vlink vinput")[0].value;
-        //      var veditor = document.getElementsByClassName("veditor vinput")[0].value;
-        //      let content = "有新的评论==>" +
-        //        "昵称：" + vnick +
-        //        " ,文章标题：" + pagename +
-        //        " ,评论内容：" + veditor +
-        //        " ,评论时间：" + pushtime.toLocaleString();
-        //        var myHeaders = new Headers();
-        //        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-        //        var urlencoded = new URLSearchParams();
-        //        urlencoded.append("msg", content);
-        //        var requestOptions = {
-        //            method: 'POST',
-        //            headers: myHeaders,
-        //            body: urlencoded,
-        //            redirect: 'follow'
-        //        };
-        //        fetch(pushLink, requestOptions)
-        //            .then(response => response.text())
-        //            .then(result => console.log(result))
-        //            .catch(error => console.log('error', error));
-        //    }
-        //
-        //    //监听
-        //    document.body.addEventListener('click', function(e) {
-        //    if(e.target.className.indexOf('vsubmit') === -1) {
-        //      return;
-        //    }
-        //    send_valine();
-
-
+        toMsg(order, "订单已完成");
         log.info("状态机事件【确认完成订单】-结束：" + message.getHeaders().toString());
         return true;
     }
@@ -92,6 +67,7 @@ public class OrderStateListenerImpl {
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.FAILED);
         order.setUpdateDate(new Date());
+        toMsg(order, "订单取消");
         log.info("状态机事件【取消订单】-结束" + message.getHeaders().toString());
         return true;
     }
@@ -102,8 +78,32 @@ public class OrderStateListenerImpl {
         Order order = (Order) message.getHeaders().get(Constant.orderHeader);
         order.setOrderStatus(OrderState.WAITING_CONFIRM);
         order.setUpdateDate(new Date());
+        toMsg(order, "订单回退");
         log.info("状态机事件【回退订单】-结束" + message.getHeaders().toString());
         return true;
     }
 
+    private void toMsg(Order order, String msg) {
+        StringBuilder builderMsg = new StringBuilder();
+        List<Long> productIds = orderItemService.lambdaQuery()
+                .eq(OrderItem::getOrderId, order.getOrderId())
+                .eq(OrderItem::getStatus, StatusEnum.YES.getStatus())
+                .list().stream().map(item -> item.getOrderItemId()).collect(Collectors.toList());
+        List<String> productTitles = productService.lambdaQuery()
+                .eq(Product::getStatus, StatusEnum.YES.getStatus())
+                .in(Product::getProductId, productIds)
+                .list().stream().map(product -> product.getTitle())
+                .collect(Collectors.toList());
+
+        builderMsg.append("【").append(msg).append("】")
+                .append("【订单号：").append(order.getOrderId()).append("】")
+                .append("【").append(order.getOrderType()).append("】")
+                .append("【").append(order.getOrderDate()).append("】")
+                .append("【").append(productTitles.toString()).append("】")
+                .append("【备注：").append(order.getOrderRemark()).append("】")
+                .append("【总价：").append(order.getTotalPrice()).append("】");
+        if (qMsgEnable) {
+            QMsgUtil.pushQMsg(builderMsg.toString(), qMsgKey);
+        }
+    }
 }

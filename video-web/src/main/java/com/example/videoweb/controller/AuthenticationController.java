@@ -74,9 +74,9 @@ public class AuthenticationController {
                     throw new RuntimeException("未开启注册");
                 }
                 userService.save(User.builder()
-                        .email(userDto.getEmail())
-                        .passwordHash(userDto.getPasswordHash())
-                        .username(userDto.getUsername())
+                        .email(userDto.getEmail().trim())
+                        .passwordHash(userDto.getPasswordHash().trim())
+                        .username(userDto.getUsername().trim())
                         .roleId(RoleEnum.NORMAL_CUSTOMER.getCode()).build());
             } catch (Exception e) {
                 //用户名重复
@@ -101,13 +101,13 @@ public class AuthenticationController {
         String signType = userDto.getSignType();
         if (signType.equals(SignEnum.LONG_IN.getType())) {
             List<User> list = userService.lambdaQuery()
-                    .eq(User::getUsername, userDto.getUsername())
+                    .eq(User::getUsername, userDto.getUsername().trim())
                     .or()
-                    .eq(User::getEmail, userDto.getEmail())
+                    .eq(User::getEmail, userDto.getEmail().trim())
                     .list();
             if (!list.isEmpty()) {
                 Optional<User> optionalUser = list.stream().filter(vUser -> vUser.getStatus().equals(StatusEnum.YES.getStatus()))
-                        .filter(vUser -> vUser.getPasswordHash().equals(userDto.getPasswordHash()))
+                        .filter(vUser -> vUser.getPasswordHash().equals(userDto.getPasswordHash().trim()))
                         .findFirst();
                 if (optionalUser.isPresent()) {
                     User user = optionalUser.get();

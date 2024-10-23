@@ -17,6 +17,10 @@ base-directory:
 sign:
   enable: false
 
+q-msg:
+  enable: true
+  key: q-msg-key
+
 ffmpeg:
   log-level: warning
   hls-time: 60
