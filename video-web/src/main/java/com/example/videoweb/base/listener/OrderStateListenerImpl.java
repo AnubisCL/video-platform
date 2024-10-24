@@ -88,7 +88,7 @@ public class OrderStateListenerImpl {
         List<Long> productIds = orderItemService.lambdaQuery()
                 .eq(OrderItem::getOrderId, order.getOrderId())
                 .eq(OrderItem::getStatus, StatusEnum.YES.getStatus())
-                .list().stream().map(item -> item.getOrderItemId()).collect(Collectors.toList());
+                .list().stream().map(item -> item.getProductId()).collect(Collectors.toList());
         List<String> productTitles = productService.lambdaQuery()
                 .eq(Product::getStatus, StatusEnum.YES.getStatus())
                 .in(Product::getProductId, productIds)
