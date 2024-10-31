@@ -57,6 +57,9 @@ public class ProductController {
         product.setStock(0L);
         product.setUpdateDate(new Date());
         product.setCreateDate(new Date());
+        if (product.getThumb().isBlank()) {
+            product.setThumb("https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg");
+        }
         return ResultVo.data(productService.save(product));
     }
 
