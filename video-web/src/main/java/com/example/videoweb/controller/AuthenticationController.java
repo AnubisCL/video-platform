@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import com.example.videoweb.base.annotation.ApiDecrypt;
+import com.example.videoweb.base.annotation.FrequencyControl;
 import com.example.videoweb.base.config.CacheConfig;
 import com.example.videoweb.domain.cache.RSAInfo;
 import com.example.videoweb.domain.dto.UserDto;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -127,6 +129,7 @@ public class AuthenticationController {
      * 判断是否登录
      * @return
      */
+    //@FrequencyControl(time = 1, unit = TimeUnit.SECONDS, count = 3, target = FrequencyControl.Target.USERID)   //每秒3次
     @GetMapping("isLogin")
     public ResultVo isLogin() {
         return ResultVo.data(StpUtil.isLogin());

@@ -1,4 +1,5 @@
 server:
+  address: ::0  # 开启ipv6
   port: 7077
 
 spring:
