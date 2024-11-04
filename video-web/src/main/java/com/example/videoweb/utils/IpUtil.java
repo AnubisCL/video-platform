@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 解决 Termux 环境中获取不到本地IP的问题
  * @Author: chailei
  * @Date: 2024/8/10 12:30
  */
