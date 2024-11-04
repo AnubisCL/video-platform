@@ -28,7 +28,7 @@ import java.util.Objects;
  * @Date: 2023/6/16 10:14
  */
 @Slf4j
-@Order(4)
+@Order(1)
 @Aspect
 @Component
 public class FrequencyControlAspect {

@@ -14,6 +14,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -25,6 +26,7 @@ import java.util.List;
  * @Author: chailei
  * @Date: 2024/10/21 15:20
  */
+@Order(3)
 @Aspect
 @Component
 public class IpReplaceAspect {
