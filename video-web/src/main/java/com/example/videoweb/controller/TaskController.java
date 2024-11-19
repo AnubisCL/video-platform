@@ -69,7 +69,11 @@ public class TaskController {
                     task.setDownloadJson(JSON.toJSONString(jsonMap));
                     task.setStatus(StatusEnum.YES.getStatus());
                     task.setTaskStatus(TaskStatusEnum.UN_START.getCode());
-                    taskList.add(task);
+                    // 校验是否已经添加过了
+                    List<Task> list = taskService.lambdaQuery()
+                            .eq(Task::getTaskStatus, 5)
+                            .like(Task::getTaskName, title).list();
+                    if (list.isEmpty()) taskList.add(task);
                     log.info("任务：{}", taskList.size());
                 } else {
                     log.info("任务：{} - {}", taskList.size(), line);
