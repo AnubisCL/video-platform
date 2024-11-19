@@ -73,12 +73,17 @@ public class TaskController {
                     List<Task> list = taskService.lambdaQuery()
                             .eq(Task::getTaskStatus, 5)
                             .like(Task::getTaskName, title).list();
-                    if (list.isEmpty()) taskList.add(task);
-                    log.info("任务：{}", taskList.size());
+                    if (list.isEmpty()) {
+                        taskList.add(task);
+                        log.info("任务：{} - 添加成功", title);
+                    } else {
+                        log.warn("任务：{} - 重复添加", title);
+                    }
                 } else {
-                    log.info("任务：{} - {}", taskList.size(), line);
+                    log.warn("任务：{} - 解析失败 {}", taskList.size(), line);
                 }
             }
+            log.warn("任务总数：{}", taskList.size());
             taskService.saveBatch(taskList);
             return ResultVo.ok("文件上传成功");
         } catch (IOException e) {
