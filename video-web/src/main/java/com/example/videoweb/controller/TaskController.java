@@ -2,6 +2,7 @@ package com.example.videoweb.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.example.videoweb.base.config.CacheConfig;
+import com.example.videoweb.base.websocket.WebSocket;
 import com.example.videoweb.domain.cache.IpInfo;
 import com.example.videoweb.domain.entity.Task;
 import com.example.videoweb.domain.enums.StatusEnum;
@@ -24,6 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,12 +42,13 @@ import java.util.Map;
 @RequestMapping("/task/")
 public class TaskController {
 
+    @Resource private WebSocket webSocket;
     @Resource private ITaskService taskService;
     @Resource private TaskSchedule taskSchedule;
     @Resource private IpInfoSchedule ipInfoSchedule;
     @Resource @Qualifier("ehCacheManager") private CacheManager cacheManager;
 
-    @PostMapping("/insertTaskTxt")
+    @PostMapping("insertTaskTxt")
     public ResultVo insertTaskTxt(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return ResultVo.error("文件未上传");
@@ -91,26 +96,26 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/doDownloadVideo")
+    @GetMapping("doDownloadVideo")
     public ResultVo downloadVideo() {
         taskSchedule.downloadVideoSchedule();
         return ResultVo.ok("执行成功");
     }
 
-    @GetMapping("/doPushHlsVideoStreams")
+    @GetMapping("doPushHlsVideoStreams")
     public ResultVo pushHlsVideoStreams() {
         taskSchedule.pushHlsVideoStreamsSchedule();
         return ResultVo.ok("执行成功");
     }
 
-    @GetMapping("/updateIpv4AndIpv6Schedule")
+    @GetMapping("updateIpv4AndIpv6Schedule")
     public ResultVo updateIpv4AndIpv6Schedule() {
         ipInfoSchedule.updateIpv4AndIpv6Schedule();
         IpInfo info = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
         return ResultVo.data(JSON.toJSONString(info));
     }
 
-    @GetMapping("/getIpv6Url")
+    @GetMapping("getIpv6Url")
     public ResultVo getIpv6Url() {
         HashMap<String, String> result = new HashMap<>();
         ipInfoSchedule.updateIpv4AndIpv6Schedule();
@@ -129,6 +134,12 @@ public class TaskController {
         }
         return ResultVo.data(result);
     }
+
+    //@GetMapping("videoTag")
+    //public ResultVo videoTag() {
+    //    videoService.initVideoTag();
+    //    return ResultVo.ok();
+    //}
 
 
 

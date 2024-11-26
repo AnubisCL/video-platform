@@ -1,20 +1,20 @@
 package com.example.videoweb.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * @Author: chailei
  * @Date: 2024/11/4 22:24
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class WSMessage {
 
-    private String type;
     private String msg;
+    private String msgType;    //default、primary、success、warning、danger
+    private String type;    //showNotify，showToast，gameMessage
+    private String code;
 }

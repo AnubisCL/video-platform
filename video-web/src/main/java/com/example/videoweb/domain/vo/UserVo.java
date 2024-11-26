@@ -37,4 +37,7 @@ public class UserVo {
 
     @Schema(description = "权限编码")
     private Set<String> permissions;
+
+    @Schema(description = "在线时长")
+    private String onlineTime;
 }

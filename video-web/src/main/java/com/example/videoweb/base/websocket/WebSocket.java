@@ -1,8 +1,10 @@
 package com.example.videoweb.base.websocket;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.example.videoweb.domain.WSMessage;
-import com.example.videoweb.domain.vo.ResultVo;
+import com.example.videoweb.domain.enums.MsgEnum;
+import com.example.videoweb.domain.enums.WSEnum;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -24,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 @Component
-@ServerEndpoint("/ws/{userId}")
+@ServerEndpoint(value = "/ws/{userId}")
 public class WebSocket {
 
     // 记录当前在线连接数
@@ -34,13 +38,30 @@ public class WebSocket {
     /**
      * 存放用户信息
      */
-    private static final ConcurrentHashMap<String, WebSocket> WEB_SOCKET_MAP = new ConcurrentHashMap<>(32);
+    private static final ConcurrentHashMap<String, WebSocket> WEB_SOCKET_MAP = new ConcurrentHashMap<>(2);
 
     /**
      * session
      */
     private Session session;
     private String userId;
+    private Date createTime; //开始建立链接时间
+
+    public Session getSession() {
+        return session;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public HashMap<String, WebSocket> getAllWebSocket() {
+        return new HashMap<String, WebSocket>(WEB_SOCKET_MAP);
+    }
 
     /**
      * 实现服务器主动推送
@@ -48,11 +69,11 @@ public class WebSocket {
      * @param message
      * @return
      */
-    public static void sendMessage(String userId, Object message) {
+    public void sendMessage(String userId, WSMessage message) {
         WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
         if (webSocket != null) {
             synchronized (webSocket.session) {
-                webSocket.session.getAsyncRemote().sendText(JSON.toJSONString(ResultVo.data(message)));
+                webSocket.session.getAsyncRemote().sendText(JSON.toJSONString(message));
             }
         }
     }
@@ -63,11 +84,11 @@ public class WebSocket {
      * @param message
      * @return
      */
-    public static Future<Void> sendMessageFuture(String userId, Object message) {
+    public Future<Void> sendMessageFuture(String userId, WSMessage message) {
         WebSocket webSocket = WEB_SOCKET_MAP.get(userId);
         if (webSocket != null) {
             synchronized (webSocket.session) {
-                return webSocket.session.getAsyncRemote().sendText(JSON.toJSONString(ResultVo.data(message)));
+                return webSocket.session.getAsyncRemote().sendText(JSON.toJSONString(message));
             }
         }
         return null;
@@ -77,10 +98,10 @@ public class WebSocket {
      * 群发消息
      * @param message
      */
-    public static void sendMessage(Object message) {
+    public void sendMessage(WSMessage message) {
         WEB_SOCKET_MAP.forEach((k, v) -> {
             synchronized (v.session) {
-                v.session.getAsyncRemote().sendText(JSON.toJSONString(ResultVo.data(message)));
+                v.session.getAsyncRemote().sendText(JSON.toJSONString(message));
             }
         });
     }
@@ -93,6 +114,8 @@ public class WebSocket {
     @OnOpen
     public void onOpen(Session session, @PathParam("userId") String userId) {
         this.session = session;
+        //记录开始建立链接时间
+        this.createTime = DateUtil.date(new Date());
         //根据token获取用户信息
         this.userId = userId;
         log.info("当前链接数: [{}], 新链接: [{}]", getOnlineCount(), userId);
@@ -139,13 +162,18 @@ public class WebSocket {
      */
     @OnMessage
     public void onMessage(Session session, String message) throws IOException, EncodeException {
-        if (message.equals("PING")) {
-            session.getBasicRemote().sendText("PONG");
+        WSMessage wsMessage = JSON.parseObject(message, WSMessage.class);
+        if (wsMessage.getType().equals(WSEnum.HEART.getType())) {
+            session.getBasicRemote().sendText(JSON.toJSONString(WSMessage.builder()
+                    .type(WSEnum.HEART.getType())
+                    .msgType(MsgEnum.DEFAULT.getType())
+                    .msg("pong")
+                    .build())
+            );
             log.info("心跳检查[{}]: [{}]", this.userId, message);
             return;
         }
-        WSMessage wsMessage = JSON.parseObject(message, WSMessage.class);
-        log.info("收到消息[{}]: [{}]", this.userId, wsMessage);
+        log.info("收到消息[{}]: [{}]", this.userId, JSON.toJSONString(message));
     }
 
     public static void addOnlineCount() {
