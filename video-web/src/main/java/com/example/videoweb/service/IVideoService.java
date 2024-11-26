@@ -13,4 +13,5 @@ import com.example.videoweb.domain.entity.Video;
  */
 public interface IVideoService extends IService<Video> {
 
+    void initVideoTag();
 }

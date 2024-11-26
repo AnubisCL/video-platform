@@ -20,4 +20,5 @@ public class VideoVo {
     @ReplaceIp
     private String videoUrl;
     private String title;
+    private String date;
 }

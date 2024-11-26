@@ -1,8 +1,8 @@
 package com.example.videoweb.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -37,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -108,7 +109,7 @@ public class VideoController {
             if (isCollect) {
                 List<Collect> collects = collectService.lambdaQuery().eq(Collect::getStatus, StatusEnum.YES.getStatus())
                         .eq(Collect::getUserId, userId).list();
-                queryWrapper.in(Video::getVideoId, collects.stream().map(Collect::getVideoId));
+                queryWrapper.in(Video::getVideoId, collects.stream().map(Collect::getVideoId).collect(Collectors.toList()));
             }
         });
         //喜欢
@@ -116,7 +117,7 @@ public class VideoController {
             if (isLike) {
                 List<Like> likes = likeService.lambdaQuery().eq(Like::getStatus, StatusEnum.YES.getStatus())
                         .eq(Like::getUserId, userId).list();
-                queryWrapper.in(Video::getVideoId, likes.stream().map(Like::getVideoId));
+                queryWrapper.in(Video::getVideoId, likes.stream().map(Like::getVideoId).collect(Collectors.toList()));
             }
         });
         //历史记录
@@ -124,7 +125,7 @@ public class VideoController {
             if (isHistory) {
                 List<History> histories = historyService.lambdaQuery().eq(History::getStatus, StatusEnum.YES.getStatus())
                         .eq(History::getUserId, userId).list();
-                queryWrapper.in(Video::getVideoId, histories.stream().map(History::getVideoId));
+                queryWrapper.in(Video::getVideoId, histories.stream().map(History::getVideoId).collect(Collectors.toList()));
             }
         });
 
@@ -136,6 +137,7 @@ public class VideoController {
                         .title(video.getTitle())
                         .imageUrl(video.getImageUrl())
                         .videoUrl(video.getHlsUrl())
+                        .date(DateUtil.format(video.getUpdateDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                         .build())
                 .toList();
         return ResultVo.data(PageVo.builder().pages(resultPage.getPages())

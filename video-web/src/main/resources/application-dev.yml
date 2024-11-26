@@ -57,8 +57,8 @@ thread-pool:
 ############## schedule 配置 ##############
 schedule:
   cron:
-    downloadVideo: '0 0 * * * ?'
-    pushHlsVideoStreams: '0 0 * * * ?'
+    downloadVideo: '0 0 0 * * ?'
+    pushHlsVideoStreams: '0 0 0 * * ?'
     updateIpv4AndIpv6: '0 0 0 * * ?'
 
 ############## mybatis-plus 配置 (文档: https://baomidou.com/introduce/) ##############
@@ -70,8 +70,8 @@ mybatis-plus:
   # 启动时是否检查 MyBatis XML 文件的存在，默认不检查。
   check-config-location: false
   configuration:
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     banner: true
     db-config:

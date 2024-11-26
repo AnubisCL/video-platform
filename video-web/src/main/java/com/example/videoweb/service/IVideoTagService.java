@@ -1,7 +1,10 @@
 package com.example.videoweb.service;
 
+import com.example.videoweb.domain.entity.Tag;
 import com.example.videoweb.domain.entity.VideoTag;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IVideoTagService extends IService<VideoTag> {
 
+    public void saveVideoTagItem(List<String> tag, Long videoId);
+
+    public List<Tag> getVideoTags(Long videoId);
 }
