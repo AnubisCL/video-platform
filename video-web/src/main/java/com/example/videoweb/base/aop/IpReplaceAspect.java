@@ -124,8 +124,7 @@ public class IpReplaceAspect {
             return originalValue.replace(localIp, replaceIpv6);
         }
         if ((protocolType.equals(ipv4) || protocolType.equals(local)) && ipInfo.getIsIpv4()) {
-            //return originalValue.replace(localIp, ipInfo.getIpv4());
-            return originalValue.replace(localIp, "192.168.1.6");
+            return originalValue.replace(localIp, ipInfo.getIpv4());
         }
         if (protocolType.equals(local)) {
             return originalValue;
