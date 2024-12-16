@@ -1,6 +1,9 @@
 FROM openjdk:17
 # 设置工作目录
 WORKDIR /app
+# 创建配置文件，日志目录
+RUN mkdir -p /app/conf
+RUN mkdir -p /app/logs
 # 将构建好的 JAR 文件复制到镜像中
 COPY target/video-web.jar /app/video-web.jar
 # 暴露应用程序的端口

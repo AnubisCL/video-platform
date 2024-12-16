@@ -14,6 +14,8 @@ pipeline {
         DOCKER_FILE_PATH = 'DockerFile'
         DOCKER_IMAGE_NAME = 'video-platform-app'
         PORT = "7077"
+        CONFIG_DIR_HOST = '/mnt/f/webui/video-platform/conf'
+        LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs
     }
 
     stages {
@@ -76,7 +78,10 @@ pipeline {
 
                         # 启动新容器
                         echo "启动新容器"
-                        docker run -d --name ${DOCKER_IMAGE_NAME} -p ${PORT}:${PORT} ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                        docker run -d --name ${DOCKER_IMAGE_NAME} -p ${PORT}:${PORT} \\
+                            -v ${CONFIG_DIR_HOST}:/app/conf \\
+                            -v ${LOGS_DIR_HOST}:/app/logs \\
+                            ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
                     """
                 }
             }
