@@ -15,7 +15,7 @@ pipeline {
         DOCKER_IMAGE_NAME = 'video-platform-app'
         PORT = "7077"
         CONFIG_DIR_HOST = '/mnt/f/webui/video-platform/conf'
-        LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs
+        LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs'
     }
 
     stages {
