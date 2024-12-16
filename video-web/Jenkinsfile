@@ -1,14 +1,14 @@
-def createVersion() {
-    // 版本号
-    return new Date().formart('yyyyMMddHHmmss') + "_${env.BUILD_ID}"
-}
+// def createVersion() {
+//     // 版本号
+//     return new Date().formart('yyyyMMddHHmmss') + "_${env.BUILD_ID}"
+// }
 
 pipeline {
     agent any
 
-    options {
-        timeout(time: 1, unit: 'MINUTES')
-    }
+//     options {
+//         timeout(time: 1, unit: 'MINUTES')
+//     }
 
 //     agent {
 //         // any 代表 pipeline在 jenkins所在的主机执行
@@ -21,7 +21,7 @@ pipeline {
 
     environment {
         // 自定义版本
-        _APP_VERSION=createVersion()
+//         _APP_VERSION=createVersion()
 
         GIT_URL = 'https://gitee.com/anubiscl/video-platform.git' // GitHub 仓库 URL https://github.com/AnubisCL/video-platform.git
         BRANCH = 'main' // 替换为你想要构建的分支
@@ -30,7 +30,8 @@ pipeline {
 
         DOCKER_FILE_PATH = 'DockerFile'
         DOCKER_IMAGE_NAME = 'video-platform-app'
-        DOCKER_IMAGE_TAG = "${_APP_VERSION}"
+//         DOCKER_IMAGE_TAG = "${_APP_VERSION}"
+        DOCKER_IMAGE_TAG = "1.0"
     }
 
     tools {
