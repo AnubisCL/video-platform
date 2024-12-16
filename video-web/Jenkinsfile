@@ -4,18 +4,20 @@ def createVersion() {
 }
 
 pipeline {
+    agent any
+
     options {
         timeout(time: 1, unit: 'MINUTES')
     }
 
-    agent {
-        // any 代表 pipeline在 jenkins所在的主机执行
-        // docker 代表 pipeline 都在docker内执行
-        docker {
-            image 'maven:3.8.2-openjdk-17' //docker镜像名称
-            args '-v $HOME/.m2:/root/.m2' //镜像启动时参数，这里的目的是为了maven下载的jar包保留在宿主机上，这样下次编译就不需要下载了
-        }
-    }
+//     agent {
+//         // any 代表 pipeline在 jenkins所在的主机执行
+//         // docker 代表 pipeline 都在docker内执行
+//         docker {
+//             image 'maven:3.8.2-openjdk-17' //docker镜像名称
+//             args '-v $HOME/.m2:/root/.m2' //镜像启动时参数，这里的目的是为了maven下载的jar包保留在宿主机上，这样下次编译就不需要下载了
+//         }
+//     }
 
     environment {
         // 自定义版本
