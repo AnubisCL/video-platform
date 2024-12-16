@@ -13,7 +13,7 @@ pipeline {
 
         DOCKER_FILE_PATH = 'DockerFile'
         DOCKER_IMAGE_NAME = 'video-platform-app'
-        DOCKER_IMAGE_TAG = "1.0"
+        PORT = "7077"
     }
 
     stages {
@@ -21,6 +21,15 @@ pipeline {
             steps {
                 git url: GIT_URL,
                 branch: BRANCH
+            }
+        }
+
+        stage('Get Commit Id') {
+            steps {
+                // 获取短哈希值并设置为 DOCKER_IMAGE_TAG
+                script {
+                    env.DOCKER_IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                }
             }
         }
 
@@ -56,11 +65,8 @@ pipeline {
                 echo '开始部署程序'
                 script {
                     sh """
-                        # 拉取新镜像
-                        docker pull ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
-
                         # 获取当前运行的容器ID
-                        OLD_CONTAINER_ID=\$(docker ps -qf "name=${CONTAINER_NAME}")
+                        OLD_CONTAINER_ID=\$(docker ps -qf "name=${DOCKER_IMAGE_NAME}")
 
                         if [ -n "\$OLD_CONTAINER_ID" ]; then
                             echo "停止并移除旧容器: \$OLD_CONTAINER_ID"
@@ -70,7 +76,7 @@ pipeline {
 
                         # 启动新容器
                         echo "启动新容器"
-                        docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                        docker run -d --name ${DOCKER_IMAGE_NAME} -p ${PORT}:${PORT} ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
                     """
                 }
             }
