@@ -1,28 +1,11 @@
-// def createVersion() {
-//     // 版本号
-//     return new Date().formart('yyyyMMddHHmmss') + "_${env.BUILD_ID}"
-// }
-
 pipeline {
-    agent any
-
-//     options {
-//         timeout(time: 1, unit: 'MINUTES')
-//     }
-
-//     agent {
-//         // any 代表 pipeline在 jenkins所在的主机执行
-//         // docker 代表 pipeline 都在docker内执行
-//         docker {
-//             image 'maven:3.8.2-openjdk-17' //docker镜像名称
-//             args '-v $HOME/.m2:/root/.m2' //镜像启动时参数，这里的目的是为了maven下载的jar包保留在宿主机上，这样下次编译就不需要下载了
-//         }
-//     }
+    agent {
+        docker {
+            image 'maven:3.8.2-openjdk-17'
+        }
+    }
 
     environment {
-        // 自定义版本
-//         _APP_VERSION=createVersion()
-
         GIT_URL = 'https://gitee.com/anubiscl/video-platform.git' // GitHub 仓库 URL https://github.com/AnubisCL/video-platform.git
         BRANCH = 'main' // 替换为你想要构建的分支
         JAR_PATH = 'video-web/target/video-web.jar' // 替换为你的 Spring Boot 应用程序 JAR 文件名
@@ -30,13 +13,7 @@ pipeline {
 
         DOCKER_FILE_PATH = 'DockerFile'
         DOCKER_IMAGE_NAME = 'video-platform-app'
-//         DOCKER_IMAGE_TAG = "${_APP_VERSION}"
         DOCKER_IMAGE_TAG = "1.0"
-    }
-
-    tools {
-        // Install the Maven version configured as "M3" and add it to the path.
-        maven "Maven3.5.2[Local]"
     }
 
     stages {
@@ -46,15 +23,24 @@ pipeline {
                 branch: BRANCH
             }
         }
+
+        stage('Config Init') {
+            steps {
+                sh 'java -version'
+                sh 'cp /home/maven/conf/settings.xml /usr/share/maven/conf/settings.xml'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo '开始编译代码'
                 sh 'mvn --version'
                 sh 'mvn clean install -DskipTests' // 使用 Maven 构建项目，跳过测试
-                sh 'ls ./target/'
+                sh 'ls video-web/target/'
                 echo '代码编译成功'
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -64,6 +50,7 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy') {
             steps {
                 echo '开始部署程序'
@@ -89,4 +76,6 @@ pipeline {
             }
         }
     }
+
 }
+
