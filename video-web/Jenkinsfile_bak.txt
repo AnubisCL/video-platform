@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    environment {
+        GIT_URL = 'https://gitee.com/anubiscl/video-platform.git' // GitHub 仓库 URL https://github.com/AnubisCL/video-platform.git
+        BRANCH = 'main' // 替换为你想要构建的分支
+        JAR_PATH = 'video-web/target/video-web.jar' // 替换为你的 Spring Boot 应用程序 JAR 文件名
+        DEPLOY_DIR = '/home/webui/video-platform' // 替换为你要部署 JAR 包的目标目录
+        RUN_SCRIPT = '(cd /home/webui/video-platform && sh /home/webui/video-platform/main.sh restart) &> /dev/null &' // 替换为你的启动脚本路径
+    }
+
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "Maven3.8.7[Local]"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: GIT_URL,
+                branch: BRANCH
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean install -DskipTests' // 使用 Maven 构建项目，跳过测试
+            }
+        }
+        stage('Copy JAR to Deployment Directory') {
+            steps {
+                sh "cp ${JAR_PATH} ${DEPLOY_DIR}"
+            }
+        }
+        stage('Run Script') {
+            steps {
+                sh "${RUN_SCRIPT}"
+            }
+        }
+    }
+}
