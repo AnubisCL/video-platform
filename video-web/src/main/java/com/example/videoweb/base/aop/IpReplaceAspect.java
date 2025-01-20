@@ -8,6 +8,7 @@ import com.example.videoweb.domain.vo.ResultVo;
 import com.example.videoweb.utils.IpUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,12 +21,15 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Field;
+import java.util.Enumeration;
 import java.util.List;
+
 
 /**
  * @Author: chailei
  * @Date: 2024/10/21 15:20
  */
+@Slf4j
 @Order(3)
 @Aspect
 @Component
@@ -35,6 +39,7 @@ public class IpReplaceAspect {
     @Qualifier("ehCacheManager") private CacheManager cacheManager;
 
     @Value("${nginx-config.protocol-type.local.name}") private String local;
+    @Value("${nginx-config.protocol-type.local.protocol}") private String protocol;
     @Value("${nginx-config.protocol-type.local.local-ipv4-ip}") private String localIp;
     @Value("${nginx-config.protocol-type.ipv4.name}") private String ipv4;
     @Value("${nginx-config.protocol-type.ipv6.name}") private String ipv6;
@@ -51,23 +56,25 @@ public class IpReplaceAspect {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
+                //origin：https://www.anubis.work.gd:1022
+                String scheme = request.getHeader("origin").split("://")[0];
                 String protocolType = IpUtil.getIpAddressProtocolType(request, domainHost);
                 IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
 
                 Object data = resultVo.getData();
                 if (data instanceof String) { // 直接返回带IP的String
                     String value = (String) data;
-                    String replacedValue = replaceIp(value, protocolType, ipInfo);
+                    String replacedValue = replaceIp(value, protocolType, ipInfo, scheme);
                     ((ResultVo) result).setData(replacedValue);
                 } else if(data instanceof List) {
                     List dataList =  (List) data;
                     for (Object object : dataList) {
                         if (object.getClass().isAnnotationPresent(ReplaceIpEntity.class)) {
-                            getReplaceIpAnnotation(object, protocolType, ipInfo);
+                            getReplaceIpAnnotation(object, protocolType, ipInfo, scheme);
                         }
                     }
                 } else if (data.getClass().isAnnotationPresent(ReplaceIpEntity.class)) {
-                    getReplaceIpAnnotation(data, protocolType, ipInfo);
+                    getReplaceIpAnnotation(data, protocolType, ipInfo, scheme);
                 }
             }
         }
@@ -75,7 +82,7 @@ public class IpReplaceAspect {
         return result;
     }
 
-    private void getReplaceIpAnnotation(Object object, String protocolType, IpInfo ipInfo) {
+    private void getReplaceIpAnnotation(Object object, String protocolType, IpInfo ipInfo,String scheme) {
         Class<?> clazz = object.getClass();
         Field[] declaredFields = clazz.getDeclaredFields();
 
@@ -88,10 +95,10 @@ public class IpReplaceAspect {
                         if (nestedObject instanceof List) {
                             List nestedObjectList = (List)nestedObject;
                             for (Object o : nestedObjectList) {
-                                getReplaceIpAnnotation(o, protocolType, ipInfo);
+                                getReplaceIpAnnotation(o, protocolType, ipInfo, scheme);
                             }
                         } else {
-                            getReplaceIpAnnotation(nestedObject, protocolType, ipInfo);
+                            getReplaceIpAnnotation(nestedObject, protocolType, ipInfo, scheme);
                         }
                     }
                 } catch (IllegalAccessException e) {
@@ -104,7 +111,7 @@ public class IpReplaceAspect {
                 try {
                     Object fieldValue = declaredField.get(object);
                     if (fieldValue instanceof String) {
-                        String replacedValue = replaceIp((String) fieldValue, protocolType, ipInfo);
+                        String replacedValue = replaceIp((String) fieldValue, protocolType, ipInfo, scheme);
                         declaredField.set(object, replacedValue);
                     }
                 } catch (IllegalAccessException e) {
@@ -115,21 +122,30 @@ public class IpReplaceAspect {
     }
 
 
-    private String replaceIp(String originalValue, String protocolType, IpInfo ipInfo) {
+    private String replaceIp(String originalValue, String protocolType, IpInfo ipInfo, String scheme) {
+        String resultValue = originalValue;
         if (protocolType.equals(domain)) {
-            return originalValue.replace(localIp, domainHost);
+            resultValue = originalValue.replace(localIp, domainHost);
         }
         if (protocolType.equals(ipv6) && ipInfo.getIsIpv6()) {
             String replaceIpv6 = "[" + ipInfo.getIpv6() + "]";
-            return originalValue.replace(localIp, replaceIpv6);
+            resultValue = originalValue.replace(localIp, replaceIpv6);
         }
         if ((protocolType.equals(ipv4) || protocolType.equals(local)) && ipInfo.getIsIpv4()) {
-            return originalValue.replace(localIp, ipInfo.getIpv4());
+            resultValue = originalValue.replace(localIp, ipInfo.getIpv4());
         }
         if (protocolType.equals(local)) {
-            return originalValue;
+            resultValue = originalValue;
         }
-        return originalValue;
+        return replaceProtocol(protocol, scheme, resultValue);
+    }
+
+    private String replaceProtocol(String protocol, String scheme, String originalValue) {
+        if (protocol.equalsIgnoreCase(scheme)) {
+            return originalValue;
+        } else {
+            return originalValue.replace(protocol, scheme);
+        }
     }
 }
 

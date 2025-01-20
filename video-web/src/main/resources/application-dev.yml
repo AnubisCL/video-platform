@@ -28,6 +28,7 @@ ffmpeg:
 nginx-config:
   protocol-type:
     local:
+      protocol: http
       name: local
       local-ipv4-ip: 127.0.0.1 # 数据库中环回地址
     ipv4:
