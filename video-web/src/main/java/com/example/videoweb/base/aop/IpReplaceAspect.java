@@ -56,8 +56,10 @@ public class IpReplaceAspect {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
+                //Origin:用途: Origin头字段用于指示请求的源（协议、域名和端口），主要用于跨域资源共享（CORS）请求。它告诉服务器请求的来源域。
+                //Referer:用途: Referer头字段用于指示当前请求的来源页面的URL。它告诉服务器用户是从哪个页面跳转过来的。
                 //origin：https://www.anubis.work.gd:1022
-                String scheme = request.getHeader("origin").split("://")[0];
+                String scheme = request.getHeader("referer").split("://")[0];
                 String protocolType = IpUtil.getIpAddressProtocolType(request, domainHost);
                 IpInfo ipInfo = cacheManager.getCache(CacheConfig.IP_CACHE_NAME, String.class, IpInfo.class).get(CacheConfig.IP_CACHE_NAME);
 

@@ -1,6 +1,7 @@
 server:
   address: ::0  # 开启ipv6
   port: 7077
+  shutdown: graceful # 优雅停机
 
 spring:
   application:
@@ -11,6 +12,10 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  fastjson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    serializer-features:
+        - PrettyFormat
 
 #Prometheus springboot监控配置
 management:
