@@ -21,18 +21,15 @@ import java.util.List;
 @Configuration
 public class FastJsonConfiguration implements WebMvcConfigurer {
 
-    @Value("${fastjson.date-format}")
+    @Value("${spring.fastjson.date-format}")
     private String dateFormat;
-
-    @Value("${fastjson.serializer-features}")
-    private List<SerializerFeature> serializerFeatures;
 
     @Bean
     public HttpMessageConverter<?> fastJsonHttpMessageConverter() {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
         fastJsonConfig.setCharset(StandardCharsets.UTF_8);
-        fastJsonConfig.setSerializerFeatures(serializerFeatures.toArray(new SerializerFeature[0]));
+        fastJsonConfig.setSerializerFeatures(SerializerFeature.PrettyFormat);
         fastJsonConfig.setDateFormat(dateFormat);
         converter.setFastJsonConfig(fastJsonConfig);
         List<MediaType> mediaTypes = new ArrayList<>();

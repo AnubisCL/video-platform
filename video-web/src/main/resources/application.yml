@@ -14,8 +14,6 @@ spring:
       max-request-size: 10MB
   fastjson:
     date-format: yyyy-MM-dd HH:mm:ss
-    serializer-features:
-        - PrettyFormat
 
 #Prometheus springboot监控配置
 management:
