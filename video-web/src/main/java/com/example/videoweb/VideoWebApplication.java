@@ -30,7 +30,7 @@ public class VideoWebApplication {
         // 打印swagger-ui的访问URL
         System.out.printf("""
                 ----------------------------------------------------------------------
-                |    vide-web  当前环境 %s 启动成功
+                |    video-web  当前环境 %s 启动成功
                 |    springdoc http://%s:%d%s
                 ----------------------------------------------------------------------
                 """, env.getActiveProfiles()[0], localIp, localPort, swaggerPath);

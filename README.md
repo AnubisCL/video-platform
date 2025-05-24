@@ -3,6 +3,9 @@ Personal video website
 
 # 前端： [video-vant-mobile](https://github.com/AnubisCL/video-vant-mobile)
 
+## Todo
+- [] 规则引擎+python脚本执行=》爬取短剧视频
+
 ## Git
 ```shell
 1.feat: 新功能(feature)
