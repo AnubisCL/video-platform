@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.4] - 2025-08-01
+
+### ⚙️ Miscellaneous Tasks
+
+- 修正 Dockerfile 文件名大小写
+
 ## [0.1.3] - 2025-08-01
 
 ### 💼 Other
