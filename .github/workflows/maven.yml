@@ -39,45 +39,18 @@ jobs:
         
     - name: Run Container
       run: |
-        echo "蓝绿发布容器"
-        SERVER_IP=127.0.0.1
-        echo "调用Nginx插件ngx_dynamic_upstream"
-        OLD_PORT=$(curl "http://127.0.0.1:8000/dynamic?upstream=zone_for_video_backends" | grep -oP ':\K[0-9]+')
-        echo "old port: $OLD_PORT"
-
-        if [[ "$OLD_PORT" == "8082" ]]; then
-          NEW_PORT=7077
-        else
-          NEW_PORT=7078
-        fi
-
-        echo "停止并删除旧容器（如果存在）"
-        docker stop video-web-$NEW_PORT || true
-        docker rm video-webo-$NEW_PORT || true
-
-        echo "启动新容器 video-web-$NEW_PORT"
+        docker stop video-web || true
+        docker rm video-webo || true
+        echo "启动新容器 video-web"
         CONFIG_DIR_HOST = '/mnt/f/webui/video-platform/conf'
         LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs'
         docker run -d \
-          --name video-web-$NEW_PORT \
+          --name video-web \
           -v $CONFIG_DIR_HOST:/app/conf \
           -v $LOGS_DIR_HOST:/app/logs \
           -p $NEW_PORT:7077 \
           anubiscl/video-web:$GITHUB_SHA
-
         echo "等待应用启动"
-        sleep 20
-        echo "添加 upstream 节点 $SERVER_IP:$NEW_PORT"
-        curl "http://127.0.0.1:8000/dynamic?upstream=zone_for_video_backends&add=&server=$SERVER_IP:$NEW_PORT"
         sleep 10
-        echo "移除 upstream 节点 $SERVER_IP:$OLD_PORT"
-        curl "http://127.0.0.1:8000/dynamic?upstream=zone_for_video_backends&remove=&server=$SERVER_IP:$OLD_PORT"
-
-        echo "停止旧容器 video-web-$OLD_PORT"
-        podman stop video-web-$OLD_PORT || true
-
-        echo "删除旧容器 video-web-$OLD_PORT"
-        sleep 5
-        podman rm video-web-$OLD_PORT || true
-
+       
     - run: echo "🍏 This job's status is ${{ job.status }}."
