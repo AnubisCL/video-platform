@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "after:bump": "git cliff --bump -o --tag=v${version}"
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "out": [
+        {
+          "file": "pom.xml",
+          "path": "project > properties > revision",
+          "type": "application/xml"
+        }
+      ]
+    }
+  }
+}
