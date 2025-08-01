@@ -31,7 +31,7 @@ jobs:
     - name: Build Container
       run: |
         echo "开始构建video-web容器"
-        docker build -t anubiscl/video-web:{{github.sha}} -f video-platform/video-web/DockerFile .
+        docker build -t anubiscl/video-web:$GITHUB_SHA -f video-platform/video-web/DockerFile .
         
     - name: Push Container
       run: |
@@ -63,7 +63,7 @@ jobs:
           -v $CONFIG_DIR_HOST:/app/conf \
           -v $LOGS_DIR_HOST:/app/logs \
           -p $NEW_PORT:7077 \
-          anubiscl/video-web:{{github.sha}}
+          anubiscl/video-web:$GITHUB_SHA
 
         echo "等待应用启动"
         sleep 20
