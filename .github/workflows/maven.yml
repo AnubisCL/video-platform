@@ -30,25 +30,36 @@ jobs:
     - name: Build Container
       run: |
         echo "开始构建video-web容器"
-        docker build -t anubiscl/video-web:$GITHUB_SHA -f video-platform/video-web/DockerFile .
+        # 提取标签名称（去除'v'前缀）
+        TAG_NAME=${GITHUB_REF_NAME#v}
+        docker build -t anubiscl/video-web:${TAG_NAME} -f video-platform/video-web/Dockerfile .
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Push Container
       run: |
         echo "开始推送容器到仓库"
+        TAG_NAME=${GITHUB_REF_NAME#v}
+        docker push anubiscl/video-web:${TAG_NAME}
 
     - name: Run Container
       run: |
         docker stop video-web || true
         docker rm video-web || true
         echo "启动新容器 video-web"
-        CONFIG_DIR_HOST = '/mnt/f/webui/video-platform/conf'
-        LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs'
+        CONFIG_DIR_HOST='/mnt/f/webui/video-platform/conf'
+        LOGS_DIR_HOST='/mnt/f/webui/video-platform/logs'
+        TAG_NAME=${GITHUB_REF_NAME#v}
         docker run -d \
           --name video-web \
           -v $CONFIG_DIR_HOST:/app/conf \
           -v $LOGS_DIR_HOST:/app/logs \
-          -p $NEW_PORT:7077 \
-          anubiscl/video-web:$GITHUB_SHA
+          -p 7077:7077 \
+          anubiscl/video-web:${TAG_NAME}
         echo "等待应用启动"
         sleep 10
 
