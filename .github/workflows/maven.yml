@@ -32,15 +32,15 @@ jobs:
       run: |
         echo "开始构建video-web容器"
         docker build -t anubiscl/video-web:$GITHUB_SHA -f video-platform/video-web/DockerFile .
-        
+
     - name: Push Container
       run: |
         echo "开始推送容器到仓库"
-        
+
     - name: Run Container
       run: |
         docker stop video-web || true
-        docker rm video-webo || true
+        docker rm video-web || true
         echo "启动新容器 video-web"
         CONFIG_DIR_HOST = '/mnt/f/webui/video-platform/conf'
         LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs'
@@ -52,5 +52,5 @@ jobs:
           anubiscl/video-web:$GITHUB_SHA
         echo "等待应用启动"
         sleep 10
-       
+
     - run: echo "🍏 This job's status is ${{ job.status }}."
