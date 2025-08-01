@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - 2025-08-01
+
+### 💼 Other
+
+- 优化 Docker 镜像构建流程
+
 ## [0.1.2] - 2025-08-01
 
 ### 📚 Documentation
