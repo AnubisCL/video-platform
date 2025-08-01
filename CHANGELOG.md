@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2025-08-01
+
+### 📚 Documentation
+
+- 添加 CHANGELOG.md 文件记录项目变更历史
+
+### ⚙️ Miscellaneous Tasks
+
+- 修改 GitHub Actions 触发条件
+- 优化 Docker 镜像构建和推送流程
+
 ## [0.1.0] - 2025-08-01
 
 ### 🐛 Bug Fixes
