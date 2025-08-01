@@ -1,0 +1,83 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: video-web CI&CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn clean package -U -Pprod -Dmaven.test.skip=true
+
+    - name: Build Container
+      run: |
+        echo "开始构建video-web容器"
+        docker build -t anubiscl/video-web:$GITHUB_SHA -f video-platform/video-web/DockerFile .
+        
+    - name: Push Container
+      run: |
+        echo "开始推送容器到仓库"
+        
+    - name: Run Container
+      run: |
+        echo "蓝绿发布容器"
+        SERVER_IP=127.0.0.1
+        echo "调用Nginx插件ngx_dynamic_upstream"
+        OLD_PORT=$(curl "http://127.0.0.1:8000/dynamic?upstream=zone_for_video_backends" | grep -oP ':\K[0-9]+')
+        echo "old port: $OLD_PORT"
+
+        if [[ "$OLD_PORT" == "8082" ]]; then
+          NEW_PORT=7077
+        else
+          NEW_PORT=7078
+        fi
+
+        echo "停止并删除旧容器（如果存在）"
+        docker stop video-web-$NEW_PORT || true
+        docker rm video-webo-$NEW_PORT || true
+
+        echo "启动新容器 video-web-$NEW_PORT"
+        CONFIG_DIR_HOST = '/mnt/f/webui/video-platform/conf'
+        LOGS_DIR_HOST = '/mnt/f/webui/video-platform/logs'
+        docker run -d \
+          --name video-web-$NEW_PORT \
+          -v $CONFIG_DIR_HOST:/app/conf \
+          -v $LOGS_DIR_HOST:/app/logs \
+          -p $NEW_PORT:7077 \
+          anubiscl/video-web:$GITHUB_SHA
+
+        echo "等待应用启动"
+        sleep 20
+        echo "添加 upstream 节点 $SERVER_IP:$NEW_PORT"
+        curl "http://127.0.0.1:8000/dynamic?upstream=zone_for_video_backends&add=&server=$SERVER_IP:$NEW_PORT"
+        sleep 10
+        echo "移除 upstream 节点 $SERVER_IP:$OLD_PORT"
+        curl "http://127.0.0.1:8000/dynamic?upstream=zone_for_video_backends&remove=&server=$SERVER_IP:$OLD_PORT"
+
+        echo "停止旧容器 video-web-$OLD_PORT"
+        podman stop video-web-$OLD_PORT || true
+
+        echo "删除旧容器 video-web-$OLD_PORT"
+        sleep 5
+        podman rm video-web-$OLD_PORT || true
+
+    - run: echo "🍏 This job's status is ${{ job.status }}."
